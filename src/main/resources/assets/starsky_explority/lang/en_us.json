@@ -1,0 +1,32 @@
+{
+  "item.starsky_explority.iron_collector": "Iron Collector",
+  "item.starsky_explority.diamond_collector": "Diamond Collector",
+  "item.starsky_explority.netherite_collector": "Netherite Collector",
+
+  "item.starsky_explority.silver_ingot": "Silver Ingot",
+  "item.starsky_explority.aluminium_ingot": "Aluminium Ingot",
+  "item.starsky_explority.stellarium_ingot": "Stellarium Ingot",
+  "item.starsky_explority.sample_empty": "Sample",
+  "item.starsky_explority.sample_earth": "Sample",
+  "item.starsky_explority.sample_moon": "Sample",
+  "item.starsky_explority.sample_mars": "Sample",
+  "item.starsky_explority.sample_venus": "Sample",
+  "item.starsky_explority.sample_mercury": "Sample",
+  "item.starsky_explority.research_scroll_empty": "Research Scroll (Empty)",
+  "item.starsky_explority.research_scroll_silver": "Research Scroll (Silver)",
+  "item.starsky_explority.research_scroll_aluminium": "Research Scroll (Aluminium)",
+  "item.starsky_explority.research_scroll_stellarium": "Research Scroll (Stellarium)",
+  "item.starsky_explority.sample.origin": "Origin: %s",
+
+  "item.starsky_explority.moon_cake": "Moon Cake",
+
+  "block.starsky_explority.moon_soil": "Moon Soil",
+  "block.starsky_explority.analyzer": "Analyzer",
+
+  "itemGroup.starsky_explority.tools_and_weapons": "SSE: Tools & Weapons",
+  "itemGroup.starsky_explority.ingredients": "SSE: Ingredients",
+  "itemGroup.starsky_explority.food": "SSE: Food",
+  "itemGroup.starsky_explority.blocks": "SSE: Blocks",
+
+  "container.starsky_explority.analyzer": "Analyzer"
+}

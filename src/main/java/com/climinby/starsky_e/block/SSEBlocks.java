@@ -26,7 +26,14 @@ public class SSEBlocks {
             AbstractBlock.Settings.create()
                     .sounds(BlockSoundGroup.STONE)
                     .mapColor(MapColor.STONE_GRAY)
-                    .strength(4.0F)
+                    .strength(3.0F, 9.0F)
+                    .requiresTool()), true);
+
+    public static final Block EXTRACTOR = register("extractor", new ExtractorBlock(
+            AbstractBlock.Settings.create()
+                    .sounds(BlockSoundGroup.STONE)
+                    .mapColor(MapColor.STONE_GRAY)
+                    .strength(3.0F, 9.0F)
                     .requiresTool()), true);
 
     public static Block register(String id, Block block, boolean shouldRegisterItem) {

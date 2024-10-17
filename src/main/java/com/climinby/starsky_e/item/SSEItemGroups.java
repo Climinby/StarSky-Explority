@@ -51,7 +51,7 @@ public class SSEItemGroups {
     public static void initialize() {
         Registry.register(Registries.ITEM_GROUP, SSE_TOOLS_AND_WEAPONS_KEY, SSE_TOOLS_AND_WEAPONS);
         ItemGroupEvents.modifyEntriesEvent(SSE_TOOLS_AND_WEAPONS_KEY)
-                .register((itemGroup) -> {
+                .register(itemGroup -> {
                     itemGroup.add(SSEItems.IRON_COLLECTOR);
                     itemGroup.add(SSEItems.DIAMOND_COLLECTOR);
                     itemGroup.add(SSEItems.NETHERITE_COLLECTOR);
@@ -59,14 +59,17 @@ public class SSEItemGroups {
 
         Registry.register(Registries.ITEM_GROUP, SSE_INGREDIENTS_KEY, SSE_INGREDIENTS);
         ItemGroupEvents.modifyEntriesEvent(SSE_INGREDIENTS_KEY)
-                .register((itemGroup) -> {
+                .register(itemGroup -> {
                     itemGroup.add(SSEItems.SAMPLE_EMPTY);
                     itemGroup.add(SSEItems.SAMPLE_EARTH);
                     itemGroup.add(SSEItems.SAMPLE_MOON);
                     itemGroup.add(SSEItems.SAMPLE_MARS);
                     itemGroup.add(SSEItems.SAMPLE_VENUS);
                     itemGroup.add(SSEItems.SAMPLE_MERCURY);
+                    itemGroup.add(SSEItems.RAW_ALUMINIUM);
+                    itemGroup.add(SSEItems.RAW_SILVER);
                     itemGroup.add(SSEItems.ALUMINIUM_INGOT);
+                    itemGroup.add(SSEItems.SILVER_NUGGET);
                     itemGroup.add(SSEItems.SILVER_INGOT);
                     itemGroup.add(SSEItems.STELLARIUM_INGOT);
                     itemGroup.add(SSEItems.RESEARCH_SCROLL);
@@ -77,15 +80,16 @@ public class SSEItemGroups {
 
         Registry.register(Registries.ITEM_GROUP, SSE_FOOD_KEY, SSE_FOOD);
         ItemGroupEvents.modifyEntriesEvent(SSE_FOOD_KEY)
-                .register((itemGroup) -> {
+                .register(itemGroup -> {
                     itemGroup.add(SSEItems.MOON_CAKE);
                 });
 
         Registry.register(Registries.ITEM_GROUP, SSE_BLOCKS_KEY, SSE_BLOCKS);
         ItemGroupEvents.modifyEntriesEvent(SSE_BLOCKS_KEY)
-                .register((itemGroup) -> {
+                .register(itemGroup -> {
                     itemGroup.add(SSEBlocks.MOON_SOIL);
                     itemGroup.add(SSEBlocks.ANALYZER);
+                    itemGroup.add(SSEBlocks.EXTRACTOR);
                 });
     }
 }

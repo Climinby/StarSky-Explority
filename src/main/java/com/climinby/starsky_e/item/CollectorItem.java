@@ -1,6 +1,7 @@
 package com.climinby.starsky_e.item;
 
 import com.climinby.starsky_e.block.SSEBlocks;
+import com.climinby.starsky_e.registry.SSERegistries;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -11,8 +12,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 public class CollectorItem extends ToolItem {
     private final ToolMaterial material;
@@ -25,22 +28,36 @@ public class CollectorItem extends ToolItem {
     @Override
     public boolean isSuitableFor(BlockState state) {
         Block block = state.getBlock();
-        return block == Blocks.SAND || block == Blocks.RED_SAND
-                || block == Blocks.DIRT || block == Blocks.GRASS_BLOCK
-                || block == Blocks.GRAVEL || block == SSEBlocks.MOON_SOIL;
+        for(Sample sampleType : SSERegistries.SAMPLE_TYPE) {
+            for(Block suitable : sampleType.getCollectable()) {
+                if(suitable == block) return true;
+            }
+        }
+        return false;
     }
-    public Item getRegionOf(BlockState state) {
+    public Set<Item> getRegionOf(BlockState state) {
         Block block = state.getBlock();
-        if(block == Blocks.SAND || block == Blocks.RED_SAND
-                || block == Blocks.DIRT || block == Blocks.GRASS_BLOCK
-                || block == Blocks.GRAVEL
-        ) {
-            return SSEItems.SAMPLE_EARTH;
+        Set<Item> items = new HashSet<>();
+        for(Sample sampleType : SSERegistries.SAMPLE_TYPE) {
+            for(Block suitable : sampleType.getCollectable()) {
+                if(suitable == block) {
+                    items.add(sampleType.getSampleItem());
+                }
+            }
         }
-        if(block == SSEBlocks.MOON_SOIL) {
-            return SSEItems.SAMPLE_MOON;
+        if(items.isEmpty()) {
+            items.add(SSEItems.SAMPLE_EMPTY);
         }
-        return SSEItems.SAMPLE_EMPTY;
+        return items;
+    }
+
+    public float getOdds(Item sample) {
+        for(Sample sampleType : SSERegistries.SAMPLE_TYPE) {
+            if(sampleType.getSampleItem() == sample) {
+                return sampleType.getOdds();
+            }
+        }
+        return 0.0F;
     }
 
     @Override
@@ -67,9 +84,13 @@ public class CollectorItem extends ToolItem {
                     for(ItemEntity itemEntity : droppedItems) {
                         itemEntity.discard();
                     }
-                    if(new Random().nextInt(20) < 2) {
-                        ItemStack droppedSample = new ItemStack(getRegionOf(state));
-                        Block.dropStack(world, pos, droppedSample);
+                    for(Item sample : getRegionOf(state)) {
+                        int portion = 100000000;
+                        portion = (int)((float)portion * getOdds(sample));
+                        if(new Random().nextInt(100000000) < portion) {
+                            ItemStack droppedSample = new ItemStack(sample);
+                            Block.dropStack(world, pos, droppedSample);
+                        }
                     }
                     stack.damage(1, miner, (entity) -> entity.sendToolBreakStatus(miner.getActiveHand()));
                 });

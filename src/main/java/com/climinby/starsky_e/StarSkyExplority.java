@@ -1,16 +1,23 @@
 package com.climinby.starsky_e;
 
+import com.climinby.starsky_e.attribute.entity.SSEEntityDefaultAttributes;
 import com.climinby.starsky_e.block.SSEBlocks;
 import com.climinby.starsky_e.block.SSEInkTypes;
-import com.climinby.starsky_e.entity.SSEBlockEntities;
+import com.climinby.starsky_e.command.SSECommands;
+import com.climinby.starsky_e.entity.SSEEntities;
 import com.climinby.starsky_e.item.SSEItemGroups;
 import com.climinby.starsky_e.item.SSEItems;
+import com.climinby.starsky_e.item.SampleTypes;
+import com.climinby.starsky_e.material.MaterialTypes;
 import com.climinby.starsky_e.planet.Galaxies;
 import com.climinby.starsky_e.planet.Planets;
-import com.climinby.starsky_e.recipe.AnalysisRecipes;
+import com.climinby.starsky_e.recipe.SSERecipeType;
+import com.climinby.starsky_e.recipe.SSERecipiSerializer;
 import com.climinby.starsky_e.registry.SSERegistries;
 import com.climinby.starsky_e.registry.SSERegistryKeys;
 import com.climinby.starsky_e.screen.SSEScreenHandlers;
+import com.climinby.starsky_e.util.SSEBlockExtend;
+import com.climinby.starsky_e.util.SSEServerDataReceiver;
 import net.fabricmc.api.ModInitializer;
 
 import org.slf4j.Logger;
@@ -31,16 +38,24 @@ public class StarSkyExplority implements ModInitializer {
 
 		SSERegistryKeys.initialize();
 		SSERegistries.initialize();
+		SSEServerDataReceiver.initialize();
+		SSEBlockExtend.init();
 
 		SSEItems.initialize();
 		SSEBlocks.initialize();
 		SSEItemGroups.initialize();
-		SSEBlockEntities.initialize();
+		SSEEntities.initialize();
 		SSEScreenHandlers.initialize();
 		SSEInkTypes.initialize();
 		Galaxies.initialize();
 		Planets.initialize();
-		AnalysisRecipes.initialize();
+		SampleTypes.initialize();
+		MaterialTypes.init();
+		SSERecipiSerializer.init();
+		SSERecipeType.init();
+		SSEEntityDefaultAttributes.init();
+
+		SSECommands.init();
 
 		LOGGER.info("Hello Fabric world!");
 	}

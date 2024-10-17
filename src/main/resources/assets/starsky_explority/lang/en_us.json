@@ -3,6 +3,9 @@
   "item.starsky_explority.diamond_collector": "Diamond Collector",
   "item.starsky_explority.netherite_collector": "Netherite Collector",
 
+  "item.starsky_explority.raw_aluminium": "Raw Aluminium",
+  "item.starsky_explority.silver_nugget": "Silver Nugget",
+  "item.starsky_explority.raw_silver": "Raw Silver",
   "item.starsky_explority.silver_ingot": "Silver Ingot",
   "item.starsky_explority.aluminium_ingot": "Aluminium Ingot",
   "item.starsky_explority.stellarium_ingot": "Stellarium Ingot",
@@ -22,11 +25,17 @@
 
   "block.starsky_explority.moon_soil": "Moon Soil",
   "block.starsky_explority.analyzer": "Analyzer",
+  "block.starsky_explority.extractor": "Extractor",
 
   "itemGroup.starsky_explority.tools_and_weapons": "SSE: Tools & Weapons",
   "itemGroup.starsky_explority.ingredients": "SSE: Ingredients",
   "itemGroup.starsky_explority.food": "SSE: Food",
   "itemGroup.starsky_explority.blocks": "SSE: Blocks",
 
-  "container.starsky_explority.analyzer": "Analyzer"
+  "container.starsky_explority.analyzer.title": "Analyzer",
+  "container.starsky_explority.analyzer.odds": "Odds: %s%%",
+  "container.starsky_explority.analyzer.button.analyse.clickable": "Analyse",
+  "container.starsky_explority.analyzer.button.analyse.unclickable": "%s%%...",
+  "container.starsky_explority.analyzer.profile.text.unlocked": "Unlocked",
+  "container.starsky_explority.extractor.title": "Extractor"
 }

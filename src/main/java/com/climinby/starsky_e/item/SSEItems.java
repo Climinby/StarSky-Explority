@@ -24,6 +24,9 @@ public class SSEItems {
             .maxCount(1)
             .maxDamage(630)));
 
+    public static final Item RAW_ALUMINIUM = register("raw_aluminium", new Item(new Item.Settings()));
+    public static final Item RAW_SILVER = register("raw_silver", new Item(new Item.Settings()));
+    public static final Item SILVER_NUGGET = register("silver_nugget", new Item(new Item.Settings()));
     public static final Item SILVER_INGOT = register("silver_ingot", new Item(new Item.Settings()));
     public static final Item ALUMINIUM_INGOT = register("aluminium_ingot", new Item(new Item.Settings()));
     public static final Item STELLARIUM_INGOT = register("stellarium_ingot", new StellariumItem(new Item.Settings()));
@@ -34,15 +37,15 @@ public class SSEItems {
     public static final Item SAMPLE_VENUS = register("sample_venus", new SampleItem(new Item.Settings(), Planets.VENUS));
     public static final Item SAMPLE_MERCURY = register("sample_mercury", new SampleItem(new Item.Settings(), Planets.MERCURY));
     public static final Item RESEARCH_SCROLL = register("research_scroll_empty", new ScrollItem(new Item.Settings()));
-    public static final Item RESEARCH_SCROLL_SILVER = register("research_scroll_silver", new ScrollItem(SILVER_INGOT,0.125F ,new Item.Settings()));
-    public static final Item RESEARCH_SCROLL_ALUMINIUM = register("research_scroll_aluminium", new ScrollItem(ALUMINIUM_INGOT, 0.5F, new Item.Settings()));
+    public static final Item RESEARCH_SCROLL_SILVER = register("research_scroll_silver", new ScrollItem(SILVER_INGOT,0.25F ,new Item.Settings()));
+    public static final Item RESEARCH_SCROLL_ALUMINIUM = register("research_scroll_aluminium", new ScrollItem(ALUMINIUM_INGOT, 0.125F, new Item.Settings()));
     public static final Item RESEARCH_SCROLL_STELLARIUM = register("research_scroll_stellarium", new ScrollItem(STELLARIUM_INGOT, 0.015625F,new Item.Settings()));
 
     public static final Item MOON_CAKE = register("moon_cake", new Item(new Item.Settings()
             .food(new FoodComponent.Builder()
                     .hunger(6)
                     .saturationModifier(5.5F)
-                    .statusEffect(new StatusEffectInstance(StatusEffects.NIGHT_VISION, 180 * 20, 1), 1.0F)
+                    .statusEffect(new StatusEffectInstance(StatusEffects.NIGHT_VISION, 180 * 20, 0), 1.0F)
                     .build())));
 
     public static Item register(String id, Item item) {

@@ -7,15 +7,16 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
-public class AnalyzerButton extends ButtonWidget {
-    private static final Identifier TEXTURE = new Identifier(StarSkyExplority.MOD_ID, "textures/gui/container/analyzer.png");
+public class SSEButton extends ButtonWidget {
+    private final Identifier TEXTURE;
     private final int textureX;
     private final int textureY;
 
-    public AnalyzerButton(int x, int y, int width, int height, int textureX, int textureY, Text message, PressAction onPress) {
+    public SSEButton(int x, int y, int width, int height, int textureX, int textureY, Identifier texture, Text message, PressAction onPress) {
         super(x, y, width, height, message, onPress, ButtonWidget.DEFAULT_NARRATION_SUPPLIER);
         this.textureX = textureX;
         this.textureY = textureY;
+        TEXTURE = texture;
     }
 
     @Override
@@ -36,7 +37,6 @@ public class AnalyzerButton extends ButtonWidget {
             textureY = textureY + this.height;
             textColor = 0xFFFFFF;
         } else {
-            textureY = 195;
             textColor = 0xFFFFFF;
         }
 

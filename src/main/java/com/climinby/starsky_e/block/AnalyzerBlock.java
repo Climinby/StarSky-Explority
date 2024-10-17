@@ -1,13 +1,13 @@
 package com.climinby.starsky_e.block;
 
-import com.climinby.starsky_e.recipe.AnalysisRecipe;
 import com.climinby.starsky_e.block.entity.AnalyzerBlockEntity;
-import com.climinby.starsky_e.entity.SSEBlockEntities;
+import com.climinby.starsky_e.entity.SSEEntities;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemPlacementContext;
@@ -20,22 +20,23 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class AnalyzerBlock extends HorizontalFacingBlock implements BlockEntityProvider {
     public static final BooleanProperty WORKING = BooleanProperty.of("working");
-    public static final List<AnalysisRecipe> ANALYZER_RECIPES = new ArrayList<>();
+    public static final BooleanProperty AUTO_WORKING = BooleanProperty.of("auto_working");
 
     public AnalyzerBlock(Settings settings) {
         super(settings);
         setDefaultState(getDefaultState()
                 .with(WORKING, false)
+                .with(AUTO_WORKING, false)
                 .with(Properties.HORIZONTAL_FACING, Direction.NORTH));
     }
 
@@ -45,8 +46,27 @@ public class AnalyzerBlock extends HorizontalFacingBlock implements BlockEntityP
     }
 
     @Override
-    public void onBroken(WorldAccess world, BlockPos pos, BlockState state) {
+    public void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, BlockPos sourcePos, boolean notify) {
+        super.neighborUpdate(state, world, pos, sourceBlock, sourcePos, notify);
+        boolean hasRedstonePower = world.isReceivingRedstonePower(pos);
+        world.setBlockState(pos, world.getBlockState(pos).with(AUTO_WORKING, hasRedstonePower), Block.NOTIFY_ALL);
+    }
 
+    @Override
+    public void onBroken(WorldAccess world, BlockPos pos, BlockState state) {
+        if(!world.isClient()) {
+            world.getServer().execute(() -> {
+                List<ItemEntity> droppedItems = world.getEntitiesByClass(
+                        ItemEntity.class, new Box(pos), item -> {
+                            return item.getStack().hasNbt() && item.getStack().getNbt().contains(AnalyzerBlockEntity.IS_PREVIEW_KEY);
+                        }
+                );
+                for(ItemEntity discardable : droppedItems) {
+                    discardable.discard();
+                }
+            });
+        }
+        super.onBroken(world, pos, state);
     }
 
     @Override
@@ -71,19 +91,21 @@ public class AnalyzerBlock extends HorizontalFacingBlock implements BlockEntityP
 
     @Override
     public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-        if(state.getBlock() != newState.getBlock()) {
+        if(state.hasBlockEntity() && !state.isOf(newState.getBlock())) {
             BlockEntity blockEntity = world.getBlockEntity(pos);
             if(blockEntity instanceof AnalyzerBlockEntity) {
                 ItemScatterer.spawn(world, pos, (Inventory)blockEntity);
                 world.updateComparators(pos, this);
             }
+        }
+        if(newState.getBlock() == Blocks.AIR) {
             super.onStateReplaced(state, world, pos, newState, moved);
         }
     }
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-        return world.isClient ? null : checkType(type, SSEBlockEntities.ANALYZER_BLOCK_ENTITY, AnalyzerBlockEntity::tick);
+        return world.isClient ? null : checkType(type, SSEEntities.ANALYZER_BLOCK_ENTITY, AnalyzerBlockEntity::tick);
     }
 
     private <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> checkType(
@@ -98,7 +120,7 @@ public class AnalyzerBlock extends HorizontalFacingBlock implements BlockEntityP
 
     @Override
     public void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(WORKING).add(Properties.HORIZONTAL_FACING);
+        builder.add(WORKING).add(AUTO_WORKING).add(Properties.HORIZONTAL_FACING);
     }
 
     @Override

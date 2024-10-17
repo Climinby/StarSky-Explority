@@ -1,45 +1,37 @@
 package com.climinby.starsky_e.screen;
 
-import com.climinby.starsky_e.SSENetworkingConstants;
 import com.climinby.starsky_e.block.InkType;
 import com.climinby.starsky_e.block.entity.AnalyzerBlockEntity;
 import com.climinby.starsky_e.item.SampleItem;
 import com.climinby.starsky_e.recipe.AnalysisRecipe;
 import com.climinby.starsky_e.recipe.AnalysisResult;
 import com.climinby.starsky_e.registry.SSERegistries;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.*;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.registry.Registries;
-import net.minecraft.screen.ArrayPropertyDelegate;
-import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.Slot;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 public class AnalyzerScreenHandler extends ScreenHandler {
     private final Inventory inventory;
     private BlockPos pos;
+    private World world;
 
     public AnalyzerScreenHandler(int syncId, PlayerInventory playerInventory, PacketByteBuf buf) {
         this(syncId, playerInventory, new SimpleInventory(8));
         pos = buf.readBlockPos();
+        this.world = playerInventory.player.getWorld();
     }
     public AnalyzerScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory) {
         super(SSEScreenHandlers.ANALYZER_SCREEN_HANDLER, syncId);
+        this.world = playerInventory.player.getWorld();
         checkSize(inventory, 8);
         this.inventory = inventory;
         inventory.onOpen(playerInventory.player);
@@ -47,23 +39,13 @@ public class AnalyzerScreenHandler extends ScreenHandler {
         this.addSlot(new Slot(inventory, 0, 80, -4){
             @Override
             public boolean canInsert(ItemStack itemStack) {
-                for (AnalysisRecipe analysisRecipe : SSERegistries.ANALYSIS_RECIPE) {
-                    if (itemStack.getItem() == analysisRecipe.getMaterial()) {
-                        int count = 0;
-                        for (AnalysisResult result : analysisRecipe.getResults()) {
-                            inventory.setStack(3 + count, result.getItemStack());
-                            if (count == analysisRecipe.getResults().size() - 1) {
-                                return true;
-                            }
-                            count++;
-                        }
-                    }
-                }
+                if(itemStack.getItem() instanceof SampleItem) return true;
 
                 if(inventory instanceof AnalyzerBlockEntity) {
                     AnalyzerBlockEntity analyzer = (AnalyzerBlockEntity) inventory;
                     analyzer.sendCurrentSample();
                 }
+                inventory.markDirty();
                 return false;
             }
 
@@ -106,6 +88,8 @@ public class AnalyzerScreenHandler extends ScreenHandler {
         for(int i = 0; i < 5; i++) {
             this.addSlot(new Slot(inventory, 3 + i, 44 + i * 18, 23){
                 @Override
+                public boolean canTakePartial(PlayerEntity player) { return false; }
+                @Override
                 public boolean canTakeItems(PlayerEntity player) { return false; }
                 @Override
                 public boolean canInsert(ItemStack itemStack) { return false; }
@@ -125,28 +109,38 @@ public class AnalyzerScreenHandler extends ScreenHandler {
 
     @Override
     public boolean canUse(PlayerEntity player) {
-        return this.inventory.canPlayerUse((player));
+        return this.inventory.canPlayerUse(player);
     }
 
     @Override
     public ItemStack quickMove(PlayerEntity player, int invSlot) {
         ItemStack newStack = ItemStack.EMPTY;
         Slot slot = this.slots.get(invSlot);
-        if(slot != null && slot.hasStack()) {
-            ItemStack originalStack = slot.getStack();
-            newStack = originalStack.copy();
-            if(invSlot < this.inventory.size()) {
-                if(!this.insertItem(originalStack, this.inventory.size(), this.slots.size(), true)) {
+        if(!(invSlot < 8 && invSlot > 2)) {
+            if (slot != null && slot.hasStack()) {
+                ItemStack originalStack = slot.getStack();
+                newStack = originalStack.copy();
+//                if (invSlot < this.inventory.size()) {
+//                    System.out.println(this.slots.size());
+//                    if (!this.insertItem(originalStack, this.inventory.size(), this.slots.size(), true)) {
+//                        return ItemStack.EMPTY;
+//                    }
+//                } else if (!this.insertItem(originalStack, 0, this.inventory.size(), false)) {
+//                    return ItemStack.EMPTY;
+//                }
+                if(invSlot < 8) {
+                    if(!this.insertItem(originalStack, 8, this.slots.size(), true)) {
+                        return ItemStack.EMPTY;
+                    }
+                } else if(!this.insertItem(originalStack, 0, 2, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if(!this.insertItem(originalStack, 0, this.inventory.size(), false)) {
-                return ItemStack.EMPTY;
-            }
 
-            if(originalStack.isEmpty()) {
-                slot.setStack(ItemStack.EMPTY);
-            } else {
-                slot.markDirty();
+                if (originalStack.isEmpty()) {
+                    slot.setStack(ItemStack.EMPTY);
+                } else {
+                    slot.markDirty();
+                }
             }
         }
         return newStack;
@@ -158,5 +152,9 @@ public class AnalyzerScreenHandler extends ScreenHandler {
 
     public BlockPos getPos() {
         return pos;
+    }
+
+    public World getWorld() {
+        return world;
     }
 }

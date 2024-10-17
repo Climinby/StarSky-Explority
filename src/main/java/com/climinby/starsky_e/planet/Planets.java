@@ -13,7 +13,7 @@ public class Planets {
     public static final Planet VENUS = register("venus", new Planet(new AbstractPlanet.Settings()));
     public static final Planet MERCURY = register("mercury", new Planet(new AbstractPlanet.Settings()));
 
-    private static Planet register(String id, Planet planet) {
+    public static Planet register(String id, Planet planet) {
         Planet registeredPlanet = Registry.register(SSERegistries.PLANET, new Identifier(StarSkyExplority.MOD_ID, id), planet);
         return registeredPlanet;
     }

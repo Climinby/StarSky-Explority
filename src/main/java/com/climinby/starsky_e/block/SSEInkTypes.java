@@ -7,7 +7,7 @@ import net.minecraft.util.Identifier;
 
 public class SSEInkTypes {
     public static void initialize() {
-        AnalyzerBlockEntity.registerInkType(Items.INK_SAC, 20, new Identifier(StarSkyExplority.MOD_ID, "textures/gui/container/ordinary_ink.png"));
-        AnalyzerBlockEntity.registerInkType(Items.GLOW_INK_SAC, 10, new Identifier(StarSkyExplority.MOD_ID, "textures/gui/container/glow_ink.png"));
+        AnalyzerBlockEntity.registerInkType(Items.INK_SAC, 20, new Identifier(StarSkyExplority.MOD_ID, "textures/gui/container/ordinary_ink.png"), 100);
+        AnalyzerBlockEntity.registerInkType(Items.GLOW_INK_SAC, 10, new Identifier(StarSkyExplority.MOD_ID, "textures/gui/container/glow_ink.png"), 60);
     }
 }

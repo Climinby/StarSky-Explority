@@ -32,7 +32,7 @@ public class AnalysisResult implements Comparable<AnalysisResult> {
     }
 
     public ItemStack getItemStack() {
-        return itemStack;
+        return itemStack.copy();
     }
 
     @Override
@@ -40,12 +40,12 @@ public class AnalysisResult implements Comparable<AnalysisResult> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AnalysisResult that = (AnalysisResult) o;
-        return Objects.equals(itemStack, that.itemStack);
+        return Objects.equals(itemStack.copy(), that.itemStack.copy());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(itemStack);
+        return Objects.hashCode(itemStack.copy());
     }
 
     @Override

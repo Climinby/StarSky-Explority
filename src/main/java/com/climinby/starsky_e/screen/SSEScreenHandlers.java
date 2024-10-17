@@ -7,24 +7,22 @@ import net.minecraft.util.Identifier;
 
 public class SSEScreenHandlers {
     public static final ScreenHandlerType<AnalyzerScreenHandler> ANALYZER_SCREEN_HANDLER;
+    public static final ScreenHandlerType<ProfileScreenHandler> PROFILE_SCREEN_HANDLER;
+    public static final ScreenHandlerType<ExtractorScreenHandler> EXTRACTOR_SCREEN_HANDLER;
 
     static {
         ANALYZER_SCREEN_HANDLER = ScreenHandlerRegistry.registerExtended(
                 new Identifier(StarSkyExplority.MOD_ID, "analyzer"),
                 AnalyzerScreenHandler::new
         );
-//        ANALYZER_SCREEN_HANDLER = ScreenHandlerRegistry.registerExtended(
-//                new Identifier(StarSkyExplority.MOD_ID, "analyzer"),
-//                (syncId, inventory, buf) -> {
-//                    BlockPos pos = buf.readBlockPos();
-//                    BlockEntity blockEntity = inventory.player.getWorld().getBlockEntity(pos);
-//                    if (blockEntity instanceof AnalyzerBlockEntity) {
-//                        return new AnalyzerScreenHandler(syncId, inventory, (AnalyzerBlockEntity) blockEntity);
-//                    } else {
-//                        throw new IllegalStateException("Unexpected BlockEntity!");
-//                    }
-//                }
-//        );
+        PROFILE_SCREEN_HANDLER = ScreenHandlerRegistry.registerExtended(
+                new Identifier(StarSkyExplority.MOD_ID, "analyzer_profile"),
+                ProfileScreenHandler::new
+        );
+        EXTRACTOR_SCREEN_HANDLER = ScreenHandlerRegistry.registerExtended(
+                new Identifier(StarSkyExplority.MOD_ID, "extractor"),
+                ExtractorScreenHandler::new
+        );
     }
 
     public static void initialize() {}

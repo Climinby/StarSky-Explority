@@ -1,4 +1,4 @@
-package com.climinby.starsky_e;
+package com.climinby.starsky_e.util;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventories;

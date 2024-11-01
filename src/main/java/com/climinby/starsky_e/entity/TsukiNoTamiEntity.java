@@ -9,6 +9,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
+import org.spongepowered.asm.mixin.injection.Inject;
 
 public class TsukiNoTamiEntity extends PathAwareEntity {
     private PlayerEntity attacker;
@@ -25,6 +26,7 @@ public class TsukiNoTamiEntity extends PathAwareEntity {
                 if(playerTarget.isCreative()) this.setTarget(null);
             }
             tryAttack(this.getTarget());
+            if(!this.isInRange(this.getTarget(), 128.0)) this.setTarget(null);
         } else {
             if(this.attacker != null) {
                 if(this.attacker.isCreative()) {
@@ -77,7 +79,7 @@ public class TsukiNoTamiEntity extends PathAwareEntity {
     @Override
     public boolean tryAttack(Entity target) {
         float damage = (float) this.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE);
-        target.damage(this.getDamageSources().mobAttack(this), damage);
+        if (this.isInRange(target, 2.5)) target.damage(this.getDamageSources().mobAttack(this), damage);
         return true;
     }
 }

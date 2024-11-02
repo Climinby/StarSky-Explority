@@ -2,6 +2,7 @@ package com.climinby.starsky_e;
 
 import com.climinby.starsky_e.client.gui.screen.AnalyzerScreen;
 import com.climinby.starsky_e.client.gui.screen.ExtractorScreen;
+import com.climinby.starsky_e.sound.SSESoundEvents;
 import com.climinby.starsky_e.util.SSENetworkingConstants;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;

@@ -16,6 +16,7 @@ import com.climinby.starsky_e.recipe.SSERecipiSerializer;
 import com.climinby.starsky_e.registry.SSERegistries;
 import com.climinby.starsky_e.registry.SSERegistryKeys;
 import com.climinby.starsky_e.screen.SSEScreenHandlers;
+import com.climinby.starsky_e.sound.SSESoundEvents;
 import com.climinby.starsky_e.util.SSEBlockExtend;
 import com.climinby.starsky_e.util.SSEServerDataReceiver;
 import net.fabricmc.api.ModInitializer;
@@ -45,6 +46,7 @@ public class StarSkyExplority implements ModInitializer {
 		SSEBlocks.initialize();
 		SSEItemGroups.initialize();
 		SSEEntities.initialize();
+		SSESoundEvents.init();
 		SSEScreenHandlers.initialize();
 		SSEInkTypes.initialize();
 		Galaxies.initialize();

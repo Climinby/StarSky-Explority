@@ -37,5 +37,7 @@
   "container.starsky_explority.analyzer.button.analyse.clickable": "Analyse",
   "container.starsky_explority.analyzer.button.analyse.unclickable": "%s%%...",
   "container.starsky_explority.analyzer.profile.text.unlocked": "Unlocked",
-  "container.starsky_explority.extractor.title": "Extractor"
+  "container.starsky_explority.extractor.title": "Extractor",
+
+  "sound.starsky_explority.tsuki_no_tami_sight_lock": "Tsuki No Tami locks sight"
 }

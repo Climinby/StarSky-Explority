@@ -1,5 +1,6 @@
 package com.climinby.starsky_e.entity;
 
+import com.climinby.starsky_e.StarSkyExplority;
 import com.climinby.starsky_e.sound.SSESoundEvents;
 import com.climinby.starsky_e.util.SSENetworkingConstants;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
@@ -11,8 +12,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.*;
-import net.minecraft.entity.ai.pathing.AmphibiousSwimNavigation;
-import net.minecraft.entity.ai.pathing.SwimNavigation;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -20,6 +19,8 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.item.Item;
+import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
@@ -28,11 +29,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
-public class TsukiNoTamiEntity extends PathAwareEntity {
-    private int sightLockFreezing = 0;
+public class LunarianEntity extends PathAwareEntity {
+    private int sightLockCoolDown = 0;
     private LivingEntity attacker = null;
     private boolean isInWater = false;
     private boolean isFloating = false;
@@ -41,42 +41,68 @@ public class TsukiNoTamiEntity extends PathAwareEntity {
     private int depth = 0;
     private BlockPos prePos = this.getBlockPos();
     private int maxSubmergeDepth = 42;
+    private boolean canTeleport = false;
+    private int teleportCoolDown = 80;
+    private int attackCoolDown = 0;
 
-    protected TsukiNoTamiEntity(EntityType<? extends TsukiNoTamiEntity> entityType, World world) {
+    protected LunarianEntity(EntityType<? extends LunarianEntity> entityType, World world) {
         super(entityType, world);
     }
 
     @Override
     public void tick() {
         super.tick();
-        if(this.sightLockFreezing != 0) this.sightLockFreezing--;
+        if(this.attackCoolDown != 0) this.attackCoolDown--;
+        if(this.attacker != null && this.sightLockCoolDown != 0) this.sightLockCoolDown--;
+        else this.sightLockCoolDown = 100;
         this.getAir();
 
         if(this.attacker instanceof PlayerEntity playerTarget) {
-            if(playerTarget.isCreative() || playerTarget.isSpectator()) this.attacker = null;
+            if(playerTarget.isCreative() || playerTarget.isSpectator()) {
+                this.attacker = null;
+                this.setTarget(null);
+            }
         }
-        if(this.attacker != null && !this.isInRange(this.attacker, 96.0)) this.attacker = null;
-        if(this.getTarget() != this.attacker) {
-            this.setTarget(this.attacker);
+        if(this.attacker != null && !this.isInRange(this.attacker, 96.0)) {
+            this.attacker = null;
+            this.setTarget(null);
+        }
+        if(this.attacker != null) {
+            Item offHandItem = this.attacker.getOffHandStack().getItem();
+            Item mainHandItem = this.attacker.getMainHandStack().getItem();
+            this.canTeleport = offHandItem == Items.SHIELD || mainHandItem == Items.SHIELD;
+            if (this.getTarget() != this.attacker) {
+                this.setTarget(this.attacker);
+            }
         }
 
         if(this.getTarget() != null) {
             LivingEntity target = this.getTarget();
-            tryAttack(target);
+            if(this.attackCoolDown == 0) {
+                tryAttack(target);
+                this.attackCoolDown = 15;
+            }
 
-            if(this.getHealth() > 10 && this.sightLockFreezing == 0) {
+            if(this.getHealth() > 10 && this.sightLockCoolDown == 0) {
                 int random = new Random().nextInt(3);
                 if (random < 2) {
                     this.sightLock(target);
                 }
-                this.sightLockFreezing = 100;
+                this.sightLockCoolDown = 100;
             }
         }
 
+        if(this.attacker != null && this.attacker.isDead()) {
+            this.attacker = null;
+            this.setTarget(null);
+        }
+
+        //Projectile Reflecting
         List<ProjectileEntity> projectiles = this.getEntityWorld().getEntitiesByClass(ProjectileEntity.class, this.getBoundingBox().expand(2.5),
                 projectileEntity -> true);
         this.projectileBounce(projectiles);
 
+        //In-water Conduction
         if(this.isTouchingWater()) {
             this.isInWater = true;
         } else {
@@ -139,6 +165,16 @@ public class TsukiNoTamiEntity extends PathAwareEntity {
             }
         }
 
+        //Teleport
+        if(canTeleport && canTeleportToBack()) {
+            if(this.teleportCoolDown == 0) {
+                this.teleportation();
+                this.teleportCoolDown = 80;
+            } else {
+                this.teleportCoolDown--;
+            }
+        }
+
         this.prePos = this.getBlockPos();
     }
 
@@ -187,12 +223,33 @@ public class TsukiNoTamiEntity extends PathAwareEntity {
         return true;
     }
 
+    @Override
+    protected Identifier getLootTableId() {
+        return new Identifier(StarSkyExplority.MOD_ID, "entities/lunarian");
+    }
+
+    @Override
+    protected void dropXp() {
+        super.dropXp();
+    }
+
+    @Override
+    public int getXpToDrop() {
+        super.getXpToDrop();
+        int rand = new Random().nextInt(10);
+        if(rand < 1) return 4;
+        else if(rand < 3) return 5;
+        else if(rand < 7) return 6;
+        else if(rand < 9) return 7;
+        return 8;
+    }
+
     private void sightLock(LivingEntity target) {
         target.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, this.getEyePos());
         if(!this.getWorld().isClient()) {
             if (target instanceof ServerPlayerEntity playerTarget) {
-                Identifier soundId = Registries.SOUND_EVENT.getId(SSESoundEvents.ENTITY_TSUKI_NO_TAMI_SIGHT_LOCK);
-                sendSoundOutput(playerTarget, soundId, SoundCategory.HOSTILE, 1.0F, 1.0F);
+                Identifier soundId = Registries.SOUND_EVENT.getId(SSESoundEvents.ENTITY_LUNARIAN_SIGHT_LOCK);
+                sendSoundOutput(playerTarget, soundId, SoundCategory.HOSTILE, 2.0F, 1.0F);
             }
         }
     }
@@ -229,6 +286,37 @@ public class TsukiNoTamiEntity extends PathAwareEntity {
             }
         }
         return b;
+    }
+
+    private boolean canTeleportToBack() {
+        if(this.attacker != null) {
+            Vec3d attackerPos = this.attacker.getPos();
+            double rYaw = this.attacker.getYaw() * Math.PI / 180.0;
+            Vec3d facingDir = new Vec3d(-Math.sin(rYaw), 0, Math.cos(rYaw));
+            Vec3d backPos = attackerPos.subtract(facingDir);
+            BlockPos backBlockPos = new BlockPos(
+                    (int) Math.round(backPos.getX()),
+                    (int) Math.round(backPos.getY()) + 1,
+                    (int) Math.round(backPos.getZ())
+            );
+            BlockState backBlock = this.getWorld().getBlockState(backBlockPos);
+            return !backBlock.shouldSuffocate(this.getWorld(), backBlockPos);
+        }
+        return false;
+    }
+
+    private void teleportation() {
+        Vec3d attackerPos = this.attacker.getPos();
+        double rYaw = this.attacker.getYaw() * Math.PI / 180;
+        Vec3d facingDir = new Vec3d(-Math.sin(rYaw), 0, Math.cos(rYaw));
+        Vec3d desPos = attackerPos.subtract(facingDir);
+        Identifier soundId = Registries.SOUND_EVENT.getId(SSESoundEvents.ENTITY_LUNARIAN_TELEPORT);
+        if(!this.getWorld().isClient()) {
+            for (PlayerEntity player : this.getWorld().getPlayers()) {
+                sendSoundOutput((ServerPlayerEntity) player, soundId, SoundCategory.HOSTILE, 2.0F, 1.0F);
+            }
+        }
+        this.teleport(desPos.x, desPos.y, desPos.z);
     }
 
     private static void sendSoundOutput(ServerPlayerEntity player, Identifier soundId, SoundCategory soundCategory, float volume, float pitch) {

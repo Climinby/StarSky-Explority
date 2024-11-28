@@ -5,6 +5,7 @@ import com.climinby.starsky_e.block.SSEBlocks;
 import com.climinby.starsky_e.block.SSEInkTypes;
 import com.climinby.starsky_e.command.SSECommands;
 import com.climinby.starsky_e.entity.SSEEntities;
+import com.climinby.starsky_e.entity.effect.SSEStatusEffects;
 import com.climinby.starsky_e.item.SSEItemGroups;
 import com.climinby.starsky_e.item.SSEItems;
 import com.climinby.starsky_e.item.SampleTypes;
@@ -56,6 +57,7 @@ public class StarSkyExplority implements ModInitializer {
 		SSERecipiSerializer.init();
 		SSERecipeType.init();
 		SSEEntityDefaultAttributes.init();
+		SSEStatusEffects.init();
 
 		SSECommands.init();
 

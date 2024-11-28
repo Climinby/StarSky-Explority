@@ -1,16 +1,16 @@
 package com.climinby.starsky_e.client.entity.model;
 
-import com.climinby.starsky_e.entity.TsukiNoTamiEntity;
+import com.climinby.starsky_e.entity.LunarianEntity;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.MathHelper;
 
-import java.util.List;
+public class LunarianEntityModel extends EntityModel<LunarianEntity> {
+    private static final float RESPIRATORY_RATE = (float) (Math.PI) / 51.2F;
+    private static final float SWING_RANGE = (float) (Math.PI / 48.0);
 
-public class TsukiNoTamiEntityModel extends EntityModel<TsukiNoTamiEntity> {
     private final ModelPart main;
     private final ModelPart right_hand;
     private final ModelPart left_hand;
@@ -22,10 +22,10 @@ public class TsukiNoTamiEntityModel extends EntityModel<TsukiNoTamiEntity> {
     private final ModelPart left_leg;
     private final ModelPart right_leg;
 
-    public TsukiNoTamiEntityModel() {
+    public LunarianEntityModel() {
         this(getTexturedModelData().createModel());
     }
-    public TsukiNoTamiEntityModel(ModelPart root) {
+    public LunarianEntityModel(ModelPart root) {
         this.main = root.getChild("main");
         this.right_hand = this.main.getChild("right_hand");
         this.left_hand = this.main.getChild("left_hand");
@@ -39,23 +39,19 @@ public class TsukiNoTamiEntityModel extends EntityModel<TsukiNoTamiEntity> {
     }
 
     @Override
-    public void setAngles(TsukiNoTamiEntity entity, float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch) {
-        this.left_hand.pitch = MathHelper.cos(limbAngle * 0.6662F) * 1.4F * limbDistance;
-        this.right_hand.pitch = MathHelper.cos(limbAngle * 0.6662F + (float)Math.PI) * 1.4F * limbDistance;
+    public void setAngles(LunarianEntity entity, float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch) {
+        float deltaArmPitchL = -SWING_RANGE * MathHelper.sin(RESPIRATORY_RATE * animationProgress);
+        float deltaArmRollL = -SWING_RANGE / 2 * (MathHelper.cos(RESPIRATORY_RATE * animationProgress) + 1);
+        float deltaArmPitchR = -SWING_RANGE * MathHelper.sin(RESPIRATORY_RATE * animationProgress - (float) (Math.PI));
+        float deltaArmRollR = -SWING_RANGE / 2 * (MathHelper.cos(RESPIRATORY_RATE * animationProgress - (float) (Math.PI)) - 1);
+        this.left_hand.pitch = MathHelper.cos(limbAngle * 0.6662F) * 1.4F * limbDistance + deltaArmPitchL;
+        this.left_hand.roll = deltaArmRollL;
+        this.right_hand.pitch = MathHelper.cos(limbAngle * 0.6662F + (float)Math.PI) * 1.4F * limbDistance + deltaArmPitchR;
+        this.right_hand.roll = deltaArmRollR;
         this.right_leg.pitch = MathHelper.cos(limbAngle * 0.6662F) * 1.4F * limbDistance;
         this.left_leg.pitch = MathHelper.cos(limbAngle * 0.6662F + (float)Math.PI) * 1.4F * limbDistance;
         this.head.yaw = headYaw * ((float)Math.PI / 180F);
         this.head.pitch = headPitch * ((float)Math.PI / 180F);
-    }
-
-    /**
-     * @param rotationAngle a number to be in radians
-     */
-    private void playHurtAnimation(float rotationAngle) {
-        this.left_hand.pitch = rotationAngle;
-        this.right_hand.pitch = -rotationAngle;
-        this.left_leg.pitch = -rotationAngle;
-        this.right_leg.pitch = rotationAngle;
     }
 
     @Override

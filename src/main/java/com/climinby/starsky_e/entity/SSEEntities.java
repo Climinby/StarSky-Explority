@@ -22,10 +22,10 @@ public class SSEEntities {
             new Identifier(StarSkyExplority.MOD_ID, "extractor"),
             BlockEntityType.Builder.create(ExtractorBlockEntity::new, SSEBlocks.EXTRACTOR).build()
     );
-    public static final EntityType<TsukiNoTamiEntity> TSUKI_NO_TAMI_ENTITY = Registry.register(
+    public static final EntityType<LunarianEntity> LUNARIAN_ENTITY = Registry.register(
             Registries.ENTITY_TYPE,
-            new Identifier(StarSkyExplority.MOD_ID, "tsuki_no_tami"),
-            EntityType.Builder.create(TsukiNoTamiEntity::new, SpawnGroup.CREATURE)
+            new Identifier(StarSkyExplority.MOD_ID, "lunarian"),
+            EntityType.Builder.create(LunarianEntity::new, SpawnGroup.CREATURE)
                     .setDimensions(0.6F, 1.875F)
                     .build()
     );

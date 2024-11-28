@@ -16,7 +16,6 @@ public class SSERegistries {
             false);
     public static final Registry<Planet> PLANET = register(SSERegistryKeys.PLANET, Lifecycle.experimental(), false);
     public static final Registry<Galaxy> GALAXY = register(SSERegistryKeys.GALAXY, Lifecycle.experimental(), false);
-    //public static final Registry<AnalysisRecipe> ANALYSIS_RECIPE = register(SSERegistryKeys.ANALYSIS_RECIPE, Lifecycle.experimental(), false);
     public static final Registry<Sample> SAMPLE_TYPE = register(SSERegistryKeys.SAMPLE_TYPE, Lifecycle.experimental(), false);
     public static final Registry<MaterialType> MATERIAL_TYPE = register(SSERegistryKeys.MATERIAL_TYPE, Lifecycle.experimental(), false);
 

@@ -82,6 +82,7 @@ public class SSEItemGroups {
         ItemGroupEvents.modifyEntriesEvent(SSE_FOOD_KEY)
                 .register(itemGroup -> {
                     itemGroup.add(SSEItems.MOON_CAKE);
+                    itemGroup.add(SSEItems.SILVER_MOON_CAKE);
                 });
 
         Registry.register(Registries.ITEM_GROUP, SSE_BLOCKS_KEY, SSE_BLOCKS);

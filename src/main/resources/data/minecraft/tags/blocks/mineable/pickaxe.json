@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "starsky_explority:analyzer"
+    "starsky_explority:analyzer",
+    "starsky_explority:extractor"
   ]
 }

@@ -22,6 +22,7 @@
   "item.starsky_explority.sample.origin": "Origin: %s",
 
   "item.starsky_explority.moon_cake": "Moon Cake",
+  "item.starsky_explority.silver_moon_cake": "Silver Moon Cake",
 
   "block.starsky_explority.moon_soil": "Moon Soil",
   "block.starsky_explority.analyzer": "Analyzer",
@@ -39,5 +40,10 @@
   "container.starsky_explority.analyzer.profile.text.unlocked": "Unlocked",
   "container.starsky_explority.extractor.title": "Extractor",
 
-  "sound.starsky_explority.tsuki_no_tami_sight_lock": "Tsuki No Tami locks sight"
+  "sound.starsky_explority.lunarian_sight_lock": "Lunarian locks sight",
+  "sound.starsky_explority.lunarian_teleport": "Lunarian teleports",
+
+  "entity.starsky_explority.lunarian": "Lunarian",
+
+  "effect.starsky_explority.reflux": "Reflux"
 }

@@ -1,6 +1,7 @@
 package com.climinby.starsky_e.item;
 
 import com.climinby.starsky_e.StarSkyExplority;
+import com.climinby.starsky_e.entity.effect.SSEStatusEffects;
 import com.climinby.starsky_e.planet.Planets;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -46,6 +47,12 @@ public class SSEItems {
                     .hunger(6)
                     .saturationModifier(5.5F)
                     .statusEffect(new StatusEffectInstance(StatusEffects.NIGHT_VISION, 180 * 20, 0), 1.0F)
+                    .build())));
+    public static final Item SILVER_MOON_CAKE = register("silver_moon_cake", new Item(new Item.Settings()
+            .food(new FoodComponent.Builder()
+                    .hunger(4)
+                    .saturationModifier(3.0F)
+                    .statusEffect(new StatusEffectInstance(SSEStatusEffects.REFLUX, 60 * 20, 0), 1.0F)
                     .build())));
 
     public static Item register(String id, Item item) {

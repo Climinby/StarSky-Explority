@@ -1,8 +1,14 @@
 {
-  "tsuki_no_tami_sight_lock": {
-    "subtitle": "sound.starsky_explority.tsuki_no_tami_sight_lock",
+  "lunarian_sight_lock": {
+    "subtitle": "sound.starsky_explority.lunarian_sight_lock",
     "sounds": [
-      "starsky_explority:tsuki_no_tami_sight_lock"
+      "starsky_explority:lunarian_sight_lock"
+    ]
+  },
+  "lunarian_teleport": {
+    "subtitle": "sound.starsky_explority.lunarian_teleport",
+    "sounds": [
+      "starsky_explority:lunarian_teleport"
     ]
   }
 }

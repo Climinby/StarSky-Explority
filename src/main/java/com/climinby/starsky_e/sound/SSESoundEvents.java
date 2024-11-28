@@ -7,7 +7,8 @@ import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
 
 public class SSESoundEvents {
-    public static final SoundEvent ENTITY_TSUKI_NO_TAMI_SIGHT_LOCK = register("tsuki_no_tami_sight_lock");
+    public static final SoundEvent ENTITY_LUNARIAN_SIGHT_LOCK = register("lunarian_sight_lock");
+    public static final SoundEvent ENTITY_LUNARIAN_TELEPORT = register("lunarian_teleport");
 
     private static SoundEvent register(String id) {
         Identifier soundId = new Identifier(StarSkyExplority.MOD_ID, id);

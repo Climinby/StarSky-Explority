@@ -13,7 +13,6 @@ import net.minecraft.util.Identifier;
 public class SSERegistryKeys {
     public static final RegistryKey<Registry<Planet>> PLANET = of("planet");
     public static final RegistryKey<Registry<Galaxy>> GALAXY = of("galaxy");
-    public static final RegistryKey<Registry<AnalysisRecipe>> ANALYSIS_RECIPE = of("analysis_recipe");
     public static final RegistryKey<Registry<Sample>> SAMPLE_TYPE = of("sample_type");
     public static final RegistryKey<Registry<MaterialType>> MATERIAL_TYPE = of("material_type");
 

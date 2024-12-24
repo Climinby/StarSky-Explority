@@ -1,19 +1,15 @@
 package com.climinby.starsky_e.command;
 
-import com.climinby.starsky_e.material.MaterialType;
-import com.climinby.starsky_e.material.MaterialTypes;
+import com.climinby.starsky_e.registry.material.MaterialType;
 import com.climinby.starsky_e.nbt.player.ResearchLevel;
-import com.climinby.starsky_e.nbt.player.SSEDataHandler;
 import com.climinby.starsky_e.registry.SSERegistries;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.FloatArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.command.argument.IdentifierArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -28,21 +24,22 @@ public class ResearchCommand {
 
     public static void registerResearchCommand(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess access) {
         for(MaterialType material : SSERegistries.MATERIAL_TYPE) {
-            MATERIALS.add(material.getNbtKey());
+            MATERIALS.add(material.getId());
         }
 
         dispatcher.register(
             CommandManager.literal("research")
+                .requires(source -> source.hasPermissionLevel(1))
                 .then(CommandManager.argument("player", EntityArgumentType.player())
                     .then(CommandManager.literal("get")
-                        .then(CommandManager.argument("material", StringArgumentType.word())
+                        .then(CommandManager.argument("material", IdentifierArgumentType.identifier())
                             .suggests((ctx, builder) -> CommandSource.suggestMatching(MATERIALS, builder))
-                            .executes(ctx -> getResearch(ctx, EntityArgumentType.getPlayer(ctx, "player"), StringArgumentType.getString(ctx, "material")))))
+                            .executes(ctx -> getResearch(ctx, EntityArgumentType.getPlayer(ctx, "player"), IdentifierArgumentType.getIdentifier(ctx, "material").toString()))))
                     .then(CommandManager.literal("set")
-                        .then(CommandManager.argument("material", StringArgumentType.word())
+                        .then(CommandManager.argument("material", IdentifierArgumentType.identifier())
                             .suggests((ctx, builder) -> CommandSource.suggestMatching(MATERIALS, builder))
                             .then(CommandManager.argument("level", FloatArgumentType.floatArg(0, 100))
-                                .executes(ctx -> setResearch(ctx, EntityArgumentType.getPlayer(ctx, "player"), StringArgumentType.getString(ctx, "material"), FloatArgumentType.getFloat(ctx, "level"))))))
+                                .executes(ctx -> setResearch(ctx, EntityArgumentType.getPlayer(ctx, "player"), IdentifierArgumentType.getIdentifier(ctx, "material").toString(), FloatArgumentType.getFloat(ctx, "level"))))))
                     .then(CommandManager.literal("reset")
                         .executes(ctx -> resetResearch(ctx, EntityArgumentType.getPlayer(ctx, "player"))))));
     }
@@ -51,22 +48,6 @@ public class ResearchCommand {
         if(player != null) {
             MaterialType material = findMaterialType(materialName);
             if(material != null) {
-//                SSEDataHandler handler = (SSEDataHandler) player;
-//                NbtCompound nbt = handler.getSSEData();
-//                if(nbt.contains(ResearchLevel.RESEARCH_LEVEL_KEY)) {
-//                    NbtCompound researchLevels = nbt.getCompound(ResearchLevel.RESEARCH_LEVEL_KEY);
-//                    if(researchLevels.contains(material.getNbtKey())) {
-//                        float level = researchLevels.getFloat(material.getNbtKey());
-//                        ctx.getSource().sendFeedback(() -> Text.literal("Research level of " + SSERegistries.MATERIAL_TYPE.getId(material) + " of\n" +  player.getName().getString() + ": " + level).formatted(Formatting.GREEN), false);
-//                        return 1;
-//                    } else {
-//                        ctx.getSource().sendFeedback(() -> Text.literal("Research level of " + SSERegistries.MATERIAL_TYPE.getId(material) + " of\n" + player.getName().getString() + ": " + 0.0F).formatted(Formatting.GREEN), false);
-//                        return 1;
-//                    }
-//                } else {
-//                    ctx.getSource().sendFeedback(() -> Text.literal("Research level of " + SSERegistries.MATERIAL_TYPE.getId(material) + " of\n" + player.getName().getString() + ": " + 0.0F).formatted(Formatting.GREEN), false);
-//                    return 1;
-//                }
                 float level = ResearchLevel.getLevel(player, material);
                 ctx.getSource().sendFeedback(() -> Text.literal("Research level of " + SSERegistries.MATERIAL_TYPE.getId(material) + " of\n" +  player.getName().getString() + ": " + level).formatted(Formatting.GREEN), false);
                 return 1;
@@ -82,7 +63,7 @@ public class ResearchCommand {
     private static int resetResearch(CommandContext<ServerCommandSource> ctx, ServerPlayerEntity player) {
         int ret = 1;
         for(MaterialType materialType : SSERegistries.MATERIAL_TYPE) {
-            ret *= resetResearch(ctx, player, materialType.getNbtKey());
+            ret *= resetResearch(ctx, player, materialType.getId());
         }
         return ret;
     }
@@ -100,7 +81,7 @@ public class ResearchCommand {
 //                    NbtCompound nbt = handler.getSSEData();
 //                    if(nbt.contains(ResearchLevel.RESEARCH_LEVEL_KEY)) {
 //                        NbtCompound researchLevels = nbt.getCompound(ResearchLevel.RESEARCH_LEVEL_KEY);
-//                        researchLevels.putFloat(material.getNbtKey(), level);
+//                        researchLevels.putFloat(material.getId(), level);
 //                        ctx.getSource().sendFeedback(() -> Text.literal("Research level of " + SSERegistries.MATERIAL_TYPE.getId(material) + " of\n" +  player.getName().getString() + " is set to " + level).formatted(Formatting.GREEN), false);
 //                        return 1;
 //                    }
@@ -128,7 +109,7 @@ public class ResearchCommand {
 
     private static MaterialType findMaterialType(String materialName) {
         for(MaterialType material : SSERegistries.MATERIAL_TYPE) {
-            if(material.getNbtKey().equals(materialName)) {
+            if(material.getId().equals(materialName)) {
                 return material;
             }
         }

@@ -1,16 +1,14 @@
 package com.climinby.starsky_e.recipe;
 
 import com.climinby.starsky_e.inventory.ExtractInventory;
-import com.climinby.starsky_e.material.MaterialType;
-import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.RecipeType;
 import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
@@ -58,7 +56,7 @@ public class ExtractRecipe implements Recipe<ExtractInventory> {
         inventory.setStack(2, resultB);
         inventory.setStack(3, resultC);
 
-        inventory.removeStack(0, 1);
+        inventory.removeStack(0, input.getCount());
 
         return ItemStack.EMPTY;
     }
@@ -70,7 +68,7 @@ public class ExtractRecipe implements Recipe<ExtractInventory> {
 
     @Override
     public ItemStack getResult(DynamicRegistryManager registryManager) {
-        return null;
+        return ItemStack.EMPTY;
     }
 
     @Override
@@ -105,5 +103,12 @@ public class ExtractRecipe implements Recipe<ExtractInventory> {
 
     public List<ItemStack> getResults() {
         return results;
+    }
+
+    @Override
+    public DefaultedList<Ingredient> getIngredients() {
+        DefaultedList<Ingredient> ingredients = DefaultedList.of();
+        ingredients.add(Ingredient.ofStacks(this.input));
+        return ingredients;
     }
 }

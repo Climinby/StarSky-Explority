@@ -2,6 +2,7 @@ package com.climinby.starsky_e.block;
 
 import com.climinby.starsky_e.block.entity.AnalyzerBlockEntity;
 import com.climinby.starsky_e.entity.SSEEntities;
+import com.climinby.starsky_e.nbt.tag.SSETags;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
@@ -57,9 +58,9 @@ public class AnalyzerBlock extends HorizontalFacingBlock implements BlockEntityP
         if(!world.isClient()) {
             world.getServer().execute(() -> {
                 List<ItemEntity> droppedItems = world.getEntitiesByClass(
-                        ItemEntity.class, new Box(pos), item -> {
-                            return item.getStack().hasNbt() && item.getStack().getNbt().contains(AnalyzerBlockEntity.IS_PREVIEW_KEY);
-                        }
+                        ItemEntity.class,
+                        new Box(pos),
+                        item -> item.getStack().hasNbt() && item.getStack().getNbt().contains(SSETags.ANALYZER_IS_PREVIEW_KEY)
                 );
                 for(ItemEntity discardable : droppedItems) {
                     discardable.discard();

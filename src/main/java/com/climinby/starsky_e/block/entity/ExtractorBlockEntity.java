@@ -3,7 +3,7 @@ package com.climinby.starsky_e.block.entity;
 import com.climinby.starsky_e.block.ExtractorBlock;
 import com.climinby.starsky_e.entity.SSEEntities;
 import com.climinby.starsky_e.inventory.ExtractInventory;
-import com.climinby.starsky_e.material.MaterialType;
+import com.climinby.starsky_e.registry.material.MaterialType;
 import com.climinby.starsky_e.recipe.ExtractRecipe;
 import com.climinby.starsky_e.recipe.SSERecipeType;
 import com.climinby.starsky_e.registry.SSERegistries;
@@ -148,7 +148,7 @@ public class ExtractorBlockEntity extends BlockEntity implements
                             extractor.extractingItem = inputSlot.getItem();
                         }
                     }
-                    if (inputSlot.isOf(input.getItem())) {
+                    if (inputSlot.isOf(input.getItem()) && inputSlot.getCount() >= input.getCount()) {
                         boolean canStraightExt = true;
                         for (int i = 0; i < results.size(); i++) {
                             if(results.get(i).getItem() == Items.AIR) break;
@@ -164,7 +164,7 @@ public class ExtractorBlockEntity extends BlockEntity implements
                             if (extractor.extractingCounter == -1) {
                                 extractor.extractingCounter = 100;
                             } else if (extractor.extractingCounter == 0) {
-                                inputSlot.decrement(1);
+                                inputSlot.decrement(input.getCount());
                                 extractor.setStack(0, inputSlot);
                                 for (int i = 1; i < 4; i++) {
                                     if (extractor.getStack(i).isEmpty()) {
@@ -272,7 +272,7 @@ public class ExtractorBlockEntity extends BlockEntity implements
             return materialType;
         }
         for(MaterialType materialType1 : SSERegistries.MATERIAL_TYPE) {
-            if(materialType1.getScrollItem().getResearchedItem() == materialItem) {
+            if(materialType1.getResearchBookItem().getResearchedItem() == materialItem) {
                 materialType = materialType1;
             }
         }

@@ -1,16 +1,14 @@
 package com.climinby.starsky_e.client.gui.screen;
 
 import com.climinby.starsky_e.client.gui.button.analyzer.PageButton;
-import com.climinby.starsky_e.nbt.player.ResearchLevel;
 import com.climinby.starsky_e.recipe.SSERecipeType;
+import com.climinby.starsky_e.registry.material.MaterialType;
 import com.climinby.starsky_e.screen.ProfileScreenHandler;
 import com.climinby.starsky_e.util.SSENetworkingConstants;
 import com.climinby.starsky_e.StarSkyExplority;
-import com.climinby.starsky_e.block.InkType;
-import com.climinby.starsky_e.block.entity.AnalyzerBlockEntity;
+import com.climinby.starsky_e.registry.ink.InkType;
 import com.climinby.starsky_e.client.gui.button.analyzer.SSEButton;
 import com.climinby.starsky_e.recipe.AnalysisRecipe;
-import com.climinby.starsky_e.recipe.AnalysisResult;
 import com.climinby.starsky_e.registry.SSERegistries;
 import com.climinby.starsky_e.screen.AnalyzerScreenHandler;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -20,7 +18,6 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.render.GameRenderer;
-import net.minecraft.entity.boss.BossBar;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
@@ -28,11 +25,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.recipe.RecipeEntry;
-import net.minecraft.recipe.RecipeType;
-import net.minecraft.registry.Registries;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
-import net.minecraft.util.Colors;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -42,7 +36,7 @@ import java.util.List;
 
 public class AnalyzerScreen extends HandledScreen<AnalyzerScreenHandler> {
     private int ink;
-    private Item inkType;
+    private InkType inkType;
     private BlockPos pos;
     private Item currentSample;
     private boolean isWorking = false;
@@ -166,10 +160,10 @@ public class AnalyzerScreen extends HandledScreen<AnalyzerScreenHandler> {
     @Override
     protected void drawForeground(DrawContext context, int mouseX, int mouseY) {
         if(isInkReceived && isInkTypeReceived) {
-            for(InkType containedInkType : AnalyzerBlockEntity.INK_TYPES) {
-                if(inkType == containedInkType.getItem()) {
+            for(InkType containedInkType : SSERegistries.INK_TYPE) {
+                if(containedInkType.equals(this.inkType)) {
                     context.drawTexture(
-                            containedInkType.getTexture(),
+                            containedInkType.texture(),
                             146,
                             19 + (100 - ink) / 2,
                             0,
@@ -216,7 +210,7 @@ public class AnalyzerScreen extends HandledScreen<AnalyzerScreenHandler> {
         this.ink = ink;
     }
 
-    public void setInkType(Item inkType) {
+    public void setInkType(InkType inkType) {
         this.inkType = inkType;
     }
 
@@ -331,9 +325,13 @@ public class AnalyzerScreen extends HandledScreen<AnalyzerScreenHandler> {
         protected void drawForeground(DrawContext context, int mouseX, int mouseY) {
             int x = this.titleX + 71;
             int y = this.titleY;
-            context.drawItem(new ItemStack(page.getMaterial().getScrollItem().getResearchedItem()), x, y + 20);
-            Identifier itemId = Registries.ITEM.getId(page.getMaterial().getScrollItem().getResearchedItem());
-            Text text = Text.of(SSERegistries.MATERIAL_TYPE.getId(page.getMaterial()).getPath());
+            MaterialType material = page.getMaterial();
+            context.drawItem(new ItemStack(material.getResearchBookItem().getResearchedItem()), x, y + 20);
+            Item item = material.getResearchBookItem().getResearchedItem();
+//            Identifier itemId = Registries.ITEM.getId(page.getMaterial().getResearchBookItem().getResearchedItem());
+//            Text text = Text.of(SSERegistries.MATERIAL_TYPE.getId(page.getMaterial()).getPath());
+//            Text text = Text.translatable(item.getTranslationKey());
+            Text text = Text.translatable(material.getTranslationKey());
             int textWidth = textRenderer.getWidth(text);
             int textCentre = x - (textWidth / 2);
             context.drawText(this.textRenderer, text, textCentre + 9, y + 39, 0xFFFFFF, true);
@@ -365,7 +363,7 @@ public class AnalyzerScreen extends HandledScreen<AnalyzerScreenHandler> {
         }
 
         private static void sendProcessUpdating(ProfileScreen profileScreen) {
-            ClientPlayNetworking.send(SSENetworkingConstants.DATA_ANALYZER_PROFILE_LEVEL, PacketByteBufs.create().writeBoolean(true).writeItemStack(new ItemStack(profileScreen.page.getMaterial().getScrollItem().getResearchedItem())));
+            ClientPlayNetworking.send(SSENetworkingConstants.DATA_ANALYZER_PROFILE_LEVEL, PacketByteBufs.create().writeBoolean(true).writeItemStack(new ItemStack(profileScreen.page.getMaterial().getResearchBookItem().getResearchedItem())));
         }
     }
 }

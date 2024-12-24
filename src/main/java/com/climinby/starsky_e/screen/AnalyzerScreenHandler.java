@@ -1,11 +1,9 @@
 package com.climinby.starsky_e.screen;
 
-import com.climinby.starsky_e.block.InkType;
+import com.climinby.starsky_e.registry.SSERegistries;
+import com.climinby.starsky_e.registry.ink.InkType;
 import com.climinby.starsky_e.block.entity.AnalyzerBlockEntity;
 import com.climinby.starsky_e.item.SampleItem;
-import com.climinby.starsky_e.recipe.AnalysisRecipe;
-import com.climinby.starsky_e.recipe.AnalysisResult;
-import com.climinby.starsky_e.registry.SSERegistries;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
@@ -13,11 +11,9 @@ import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.*;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 
 public class AnalyzerScreenHandler extends ScreenHandler {
     private final Inventory inventory;
@@ -39,14 +35,26 @@ public class AnalyzerScreenHandler extends ScreenHandler {
         this.addSlot(new Slot(inventory, 0, 80, -4){
             @Override
             public boolean canInsert(ItemStack itemStack) {
-                if(itemStack.getItem() instanceof SampleItem) return true;
-
                 if(inventory instanceof AnalyzerBlockEntity) {
                     AnalyzerBlockEntity analyzer = (AnalyzerBlockEntity) inventory;
                     analyzer.sendCurrentSample();
                 }
                 inventory.markDirty();
-                return false;
+//                if(itemStack.getItem() instanceof SampleItem) {
+//                    if(inventory instanceof AnalyzerBlockEntity) {
+//                        AnalyzerBlockEntity analyzer = (AnalyzerBlockEntity) inventory;
+//                        analyzer.sendCurrentSample();
+//                    }
+//                    inventory.markDirty();
+////                    return true;
+//                }
+//
+//                if(inventory instanceof AnalyzerBlockEntity) {
+//                    AnalyzerBlockEntity analyzer = (AnalyzerBlockEntity) inventory;
+//                    analyzer.sendCurrentSample();
+//                }
+//                inventory.markDirty();
+                return true;
             }
 
             @Override
@@ -67,12 +75,12 @@ public class AnalyzerScreenHandler extends ScreenHandler {
             public boolean canInsert(ItemStack itemStack) {
                 if(inventory instanceof AnalyzerBlockEntity) {
                     AnalyzerBlockEntity analyzer = (AnalyzerBlockEntity) inventory;
-                    for(InkType containedInkType : AnalyzerBlockEntity.INK_TYPES) {
-                        if(itemStack.isOf(containedInkType.getItem())) {
+                    for(InkType containedInkType : SSERegistries.INK_TYPE) {
+                        if(itemStack.isOf(containedInkType.item())) {
                             if(analyzer.getInk() == 0) {
-                                analyzer.setInkType(containedInkType.getItem());
+                                analyzer.setInkType(containedInkType);
                                 return true;
-                            } else if(itemStack.isOf(analyzer.getInkType())) {
+                            } else if(itemStack.isOf(analyzer.getInkType().item())) {
                                 return true;
                             }
                         }

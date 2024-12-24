@@ -1,6 +1,6 @@
 package com.climinby.starsky_e.screen;
 
-import com.climinby.starsky_e.material.MaterialType;
+import com.climinby.starsky_e.registry.material.MaterialType;
 import com.climinby.starsky_e.nbt.player.ResearchLevel;
 import com.climinby.starsky_e.registry.SSERegistries;
 import net.minecraft.entity.player.PlayerEntity;

@@ -2,11 +2,14 @@ package com.climinby.starsky_e.block.entity;
 
 import com.climinby.starsky_e.inventory.AnalysisInventory;
 import com.climinby.starsky_e.item.SampleItem;
+import com.climinby.starsky_e.nbt.tag.SSETags;
 import com.climinby.starsky_e.recipe.SSERecipeType;
+import com.climinby.starsky_e.registry.SSERegistries;
+import com.climinby.starsky_e.registry.ink.InkTypes;
 import com.climinby.starsky_e.util.ImplementedInventory;
 import com.climinby.starsky_e.util.SSENetworkingConstants;
 import com.climinby.starsky_e.block.AnalyzerBlock;
-import com.climinby.starsky_e.block.InkType;
+import com.climinby.starsky_e.registry.ink.InkType;
 import com.climinby.starsky_e.entity.SSEEntities;
 import com.climinby.starsky_e.recipe.AnalysisRecipe;
 import com.climinby.starsky_e.screen.AnalyzerScreenHandler;
@@ -25,7 +28,6 @@ import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.recipe.RecipeEntry;
-import net.minecraft.registry.Registries;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -38,28 +40,22 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
 public class AnalyzerBlockEntity extends BlockEntity implements
         NamedScreenHandlerFactory, ImplementedInventory, SidedInventory, ExtendedScreenHandlerFactory {
-    public static final List<InkType> INK_TYPES = new ArrayList<>();
-    public static final String IS_PREVIEW_KEY = "is_preview";
-    public static final String INK_KEY = "Ink";
-    public static final String INK_TYPE_KEY = "InkType";
     private final DefaultedList<ItemStack> items = DefaultedList.ofSize(8, ItemStack.EMPTY);
     private int ink;
-    private Item inkType;
+    private InkType inkType;
     private boolean isAnalyseClicked = false;
     private int analysisCounter = 0;
     private int analysisTime;
 
     public AnalyzerBlockEntity(BlockPos pos, BlockState state) {
-        this(pos, state, 0, Items.INK_SAC);
+        this(pos, state, 0, InkTypes.SQUID_INK);
     }
-    public AnalyzerBlockEntity(BlockPos pos, BlockState state, int ink, Item inkType) {
+    public AnalyzerBlockEntity(BlockPos pos, BlockState state, int ink, InkType inkType) {
         super(SSEEntities.ANALYZER_BLOCK_ENTITY, pos, state);
         this.ink = ink;
         this.inkType = inkType;
@@ -80,12 +76,12 @@ public class AnalyzerBlockEntity extends BlockEntity implements
     public void readNbt(NbtCompound nbt) {
         super.readNbt(nbt);
         Inventories.readNbt(nbt, items);
-        ink = nbt.getInt(INK_KEY);
-        Identifier itemId = new Identifier(nbt.getString(INK_TYPE_KEY));
-        for(InkType containedInkType : INK_TYPES) {
-            if(Registries.ITEM.getId(containedInkType.getItem()).equals(itemId)) {
-                inkType = containedInkType.getItem();
-                analysisTime = containedInkType.getAnalysisTime();
+        ink = nbt.getInt(SSETags.ANALYZER_INK_KEY);
+        Identifier inkTypeId = new Identifier(nbt.getString(SSETags.ANALYZER_INK_TYPE_KEY));
+        for(InkType containedInkType : SSERegistries.INK_TYPE) {
+            if(SSERegistries.INK_TYPE.get(inkTypeId).equals(containedInkType)) {
+                inkType = containedInkType;
+                analysisTime = containedInkType.analysisTime();
             }
         }
     }
@@ -94,8 +90,13 @@ public class AnalyzerBlockEntity extends BlockEntity implements
     public void writeNbt(NbtCompound nbt) {
         super.writeNbt(nbt);
         Inventories.writeNbt(nbt, items);
-        nbt.putInt(INK_KEY, ink);
-        nbt.putString(INK_TYPE_KEY, Registries.ITEM.getId(inkType).toString());
+        nbt.putInt(SSETags.ANALYZER_INK_KEY, ink);
+        Identifier inkTypeId = SSERegistries.INK_TYPE.getId(inkType);
+        if(inkTypeId == null) {
+            nbt.putString(SSETags.ANALYZER_INK_TYPE_KEY, SSERegistries.INK_TYPE.getId(InkTypes.SQUID_INK).toString());
+        } else {
+            nbt.putString(SSETags.ANALYZER_INK_TYPE_KEY, SSERegistries.INK_TYPE.getId(inkType).toString());
+        }
     }
 
     @Override
@@ -110,10 +111,10 @@ public class AnalyzerBlockEntity extends BlockEntity implements
         if(!world.isClient()) {
             ItemStack itemStack = analyzer.items.get(1);
             if(!itemStack.isEmpty()) {
-                for(InkType containedInkType : INK_TYPES) {
-                    if(itemStack.getItem() == containedInkType.getItem()) {
-                        if(analyzer.ink <= 100 - containedInkType.getIncre()) {
-                            analyzer.addInk((containedInkType.getIncre()));
+                for(InkType containedInkType : SSERegistries.INK_TYPE) {
+                    if(itemStack.getItem() == containedInkType.item()) {
+                        if(analyzer.ink <= 100 - containedInkType.incre()) {
+                            analyzer.addInk((containedInkType.incre()));
                             int count = itemStack.getCount();
                             if(count == 1) {
                                 analyzer.items.set(1, ItemStack.EMPTY);
@@ -141,7 +142,7 @@ public class AnalyzerBlockEntity extends BlockEntity implements
                     for(int i = 0; i < 5; i++) {
                         ItemStack previewItem = analysisRecipe.getResults().get(i).copy();
                         NbtCompound nbt = previewItem.getOrCreateNbt();
-                        nbt.putBoolean(IS_PREVIEW_KEY, true);
+                        nbt.putBoolean(SSETags.ANALYZER_IS_PREVIEW_KEY, true);
                         previewItem.setNbt(nbt);
                         analyzer.items.set(3 + i, previewItem);
                     }
@@ -307,17 +308,18 @@ public class AnalyzerBlockEntity extends BlockEntity implements
 //                        return true;
 //                    }
 //                }
-                if(stack.getItem() instanceof SampleItem) {
-                    return true;
-                }
+//                if(stack.getItem() instanceof SampleItem) {
+//                    return true;
+//                }
+                return true;
             }
             if(slot == 1) {
-                for(InkType inkType : INK_TYPES) {
-                    if(stack.isOf(inkType.getItem())) {
-                        if(stack.isOf(this.inkType)) {
+                for(InkType inkType : SSERegistries.INK_TYPE) {
+                    if(stack.isOf(inkType.item())) {
+                        if(stack.isOf(this.inkType.item())) {
                             return true;
                         } else if(ink == 0) {
-                            setInkType(stack.getItem());
+                            setInkType(inkType);
                             return true;
                         }
                     }
@@ -362,18 +364,16 @@ public class AnalyzerBlockEntity extends BlockEntity implements
         return ink;
     }
 
-    public void setInkType(Item newInkType) {
-        for(InkType inkType : INK_TYPES) {
-            if(newInkType == inkType.getItem()) {
-                this.inkType = newInkType;
-                sendInkType();
-                this.analysisTime = inkType.getAnalysisTime();
-            }
+    public void setInkType(InkType newInkType) {
+        for(InkType inkType : SSERegistries.INK_TYPE) {
+            this.inkType = newInkType;
+            sendInkType();
+            this.analysisTime = inkType.analysisTime();
         }
         markDirty();
     }
 
-    public Item getInkType() {
+    public InkType getInkType() {
         return inkType;
     }
 
@@ -381,47 +381,50 @@ public class AnalyzerBlockEntity extends BlockEntity implements
         items.clear();
     }
 
-    public static void registerInkType(Item newType, int increasement, Identifier texture, int analysisTime) {
-        if(increasement <= 0 || increasement > 100) {
-            throw new RuntimeException("The increasement of a registering ink type must be between 0 and 100 (cannot be 0)");
-        }
-        if(analysisTime <= 0) {
-            throw new RuntimeException("Analysis Time of an Ink Type could not be negative");
-        }
+//    private static void registerInkType(Item newType, int increment, Identifier texture, int analysisTime) {
+//        if(increment <= 0 || increment > 100) {
+//            throw new RuntimeException("The increment of a registering ink type must be between 0 and 100 (cannot be 0)");
+//        }
+//        if(analysisTime <= 0) {
+//            throw new RuntimeException("Analysis Time of an Ink Type could not be negative");
+//        }
+//
+//        for(InkType containedType : INK_TYPES) {
+//            if(newType == containedType.getItem()) {
+//                containedType.setIncre(increment);
+//                return;
+//            }
+//        }
+//        INK_TYPES.add(new InkType(newType, texture, increment, analysisTime));
+//    }
 
-        for(InkType containedType : INK_TYPES) {
-            if(newType == containedType.getItem()) {
-                containedType.setIncre(increasement);
-                return;
-            }
-        }
-        INK_TYPES.add(new InkType(newType, increasement, texture, analysisTime));
-    }
-
-    public void sendInk() {
+    private void sendInk() {
         for(ServerPlayerEntity player : PlayerLookup.tracking((ServerWorld) world, pos)) {
             ServerPlayNetworking.send(player, SSENetworkingConstants.DATA_ANALYZER_INK, PacketByteBufs.create().writeInt(ink).writeBlockPos(pos));
         }
     }
 
-    public void sendInkType() {
+    private void sendInkType() {
         for(ServerPlayerEntity player : PlayerLookup.tracking((ServerWorld) world, pos)) {
-            ServerPlayNetworking.send(player, SSENetworkingConstants.DATA_ANALYZER_INK_TYPE, PacketByteBufs.create().writeItemStack(new ItemStack(inkType)).writeBlockPos(pos));
+            ServerPlayNetworking.send(player, SSENetworkingConstants.DATA_ANALYZER_INK_TYPE, PacketByteBufs.create().writeIdentifier(SSERegistries.INK_TYPE.getId(this.inkType)).writeBlockPos(pos));
         }
     }
 
     public void sendCurrentSample() {
-        for(ServerPlayerEntity player : PlayerLookup.tracking((ServerWorld) world, pos)) {
-            ServerPlayNetworking.send(player, SSENetworkingConstants.DATA_ANALYZER_CURRENT_SAMPLE, PacketByteBufs.create().writeItemStack(items.get(0)).writeBlockPos(pos));
+        ItemStack sample = items.get(0);
+        if(sample.getItem() instanceof SampleItem || sample.isOf(Items.AIR)) {
+            for(ServerPlayerEntity player : PlayerLookup.tracking((ServerWorld) world, pos)) {
+                ServerPlayNetworking.send(player, SSENetworkingConstants.DATA_ANALYZER_CURRENT_SAMPLE, PacketByteBufs.create().writeItemStack(items.get(0)).writeBlockPos(pos));
+            }
         }
     }
 
-    public void sendIsWorking(boolean isWorking, boolean isSuccessed, int progress) {
+    private void sendIsWorking(boolean isWorking, boolean isSuccess, int progress) {
         for(ServerPlayerEntity player : PlayerLookup.tracking((ServerWorld) world, pos)) {
             ServerPlayNetworking.send(player, SSENetworkingConstants.DATA_ANALYZER_ANALYSE_IS_WORKING,
                     PacketByteBufs.create()
-                            .writeBoolean(isSuccessed)
-                            .writeBoolean(isWorking && isSuccessed)
+                            .writeBoolean(isSuccess)
+                            .writeBoolean(isWorking && isSuccess)
                             .writeInt(progress)
                             .writeBlockPos(pos)
             );

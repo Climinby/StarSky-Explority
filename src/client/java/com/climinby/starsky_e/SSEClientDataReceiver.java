@@ -2,6 +2,7 @@ package com.climinby.starsky_e;
 
 import com.climinby.starsky_e.client.gui.screen.AnalyzerScreen;
 import com.climinby.starsky_e.client.gui.screen.ExtractorScreen;
+import com.climinby.starsky_e.registry.SSERegistries;
 import com.climinby.starsky_e.sound.SSESoundEvents;
 import com.climinby.starsky_e.util.SSENetworkingConstants;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -40,13 +41,13 @@ public class SSEClientDataReceiver {
         });
 
         ClientPlayNetworking.registerGlobalReceiver(SSENetworkingConstants.DATA_ANALYZER_INK_TYPE, (client, handler, buf, responseSender) -> {
-            Item inkType = buf.readItemStack().getItem();
+            Identifier inkTypeId = buf.readIdentifier();
             BlockPos pos = buf.readBlockPos();
             client.execute(() -> {
                 if(client.currentScreen instanceof AnalyzerScreen) {
                     AnalyzerScreen screen = (AnalyzerScreen) client.currentScreen;
                     if(pos.equals(screen.getPos())) {
-                        screen.setInkType(inkType);
+                        screen.setInkType(SSERegistries.INK_TYPE.get(inkTypeId));
                         screen.setInkTypeReceived(true);
                     }
                 }

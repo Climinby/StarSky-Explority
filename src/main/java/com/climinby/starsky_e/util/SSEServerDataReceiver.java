@@ -1,9 +1,8 @@
 package com.climinby.starsky_e.util;
 
 import com.climinby.starsky_e.block.entity.AnalyzerBlockEntity;
-import com.climinby.starsky_e.item.ScrollItem;
-import com.climinby.starsky_e.material.MaterialType;
-import com.climinby.starsky_e.material.MaterialTypes;
+import com.climinby.starsky_e.registry.material.MaterialType;
+import com.climinby.starsky_e.registry.material.MaterialTypes;
 import com.climinby.starsky_e.nbt.player.ResearchLevel;
 import com.climinby.starsky_e.registry.SSERegistries;
 import com.climinby.starsky_e.screen.ProfileScreenHandler;
@@ -17,10 +16,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -75,7 +72,7 @@ public class SSEServerDataReceiver {
                 MaterialType material = MaterialTypes.ALUMINIUM;
                 Item materialItem = item.getItem();
                 for(MaterialType materialType : SSERegistries.MATERIAL_TYPE) {
-                    if(materialType.getScrollItem().getResearchedItem() == materialItem) {
+                    if(materialType.getResearchBookItem().getResearchedItem() == materialItem) {
                         material = materialType;
                     }
                 }

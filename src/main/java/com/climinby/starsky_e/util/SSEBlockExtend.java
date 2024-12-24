@@ -1,16 +1,21 @@
 package com.climinby.starsky_e.util;
 
+import com.climinby.starsky_e.block.SSEBlocks;
 import com.climinby.starsky_e.item.SSEItems;
-import com.climinby.starsky_e.material.MaterialTypes;
+import com.climinby.starsky_e.registry.material.MaterialTypes;
 import com.climinby.starsky_e.nbt.player.ResearchLevel;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.PickaxeItem;
+import net.minecraft.util.math.Box;
 
+import java.util.List;
 import java.util.Random;
 
 public class SSEBlockExtend {
@@ -60,6 +65,25 @@ public class SSEBlockExtend {
                                 }
                                 if (droppedItem != null)
                                     world.getServer().execute(() -> Block.dropStack(world, pos, droppedItem));
+                            }
+                        }
+
+                        //Anorthosite popping decider
+                        if(brokenBlock == SSEBlocks.ANORTHOSITE) {
+                            float level = ResearchLevel.getLevel(player, MaterialTypes.LUNAR_CRYSTAL);
+                            if(level < 100.0F) {
+                                world.getServer().execute(() -> {
+                                    List<ItemEntity> itemEntities = world.getEntitiesByClass(
+                                            ItemEntity.class,
+                                            new Box(pos).expand(3.0),
+                                            itemEntity -> true
+                                    );
+                                    System.out.println("Discarding!!!!!!!!!!!!!!!");
+                                    for(ItemEntity itemEntity : itemEntities) {
+                                        System.out.println(itemEntity.getStack().getItem());
+                                        itemEntity.discard();
+                                    }
+                                });
                             }
                         }
                     }

@@ -1,15 +1,12 @@
 package com.climinby.starsky_e.item;
 
 import com.climinby.starsky_e.StarSkyExplority;
+import com.climinby.starsky_e.entity.SSEEntities;
 import com.climinby.starsky_e.entity.effect.SSEStatusEffects;
-import com.climinby.starsky_e.planet.Planets;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import com.climinby.starsky_e.registry.planet.Planets;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.FoodComponent;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroups;
-import net.minecraft.item.ToolMaterials;
+import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
@@ -30,6 +27,7 @@ public class SSEItems {
     public static final Item SILVER_NUGGET = register("silver_nugget", new Item(new Item.Settings()));
     public static final Item SILVER_INGOT = register("silver_ingot", new Item(new Item.Settings()));
     public static final Item ALUMINIUM_INGOT = register("aluminium_ingot", new Item(new Item.Settings()));
+    public static final Item LUNAR_CRYSTAL = register("lunar_crystal", new Item(new Item.Settings()));
     public static final Item STELLARIUM_INGOT = register("stellarium_ingot", new StellariumItem(new Item.Settings()));
     public static final Item SAMPLE_EMPTY = register("sample_empty", new SampleItem(new Item.Settings(), Planets.EMPTY));
     public static final Item SAMPLE_EARTH = register("sample_earth", new SampleItem(new Item.Settings(), Planets.EARTH));
@@ -37,10 +35,13 @@ public class SSEItems {
     public static final Item SAMPLE_MARS = register("sample_mars", new SampleItem(new Item.Settings(), Planets.MARS));
     public static final Item SAMPLE_VENUS = register("sample_venus", new SampleItem(new Item.Settings(), Planets.VENUS));
     public static final Item SAMPLE_MERCURY = register("sample_mercury", new SampleItem(new Item.Settings(), Planets.MERCURY));
-    public static final Item RESEARCH_SCROLL = register("research_scroll_empty", new ScrollItem(new Item.Settings()));
-    public static final Item RESEARCH_SCROLL_SILVER = register("research_scroll_silver", new ScrollItem(SILVER_INGOT,0.25F ,new Item.Settings()));
-    public static final Item RESEARCH_SCROLL_ALUMINIUM = register("research_scroll_aluminium", new ScrollItem(ALUMINIUM_INGOT, 0.125F, new Item.Settings()));
-    public static final Item RESEARCH_SCROLL_STELLARIUM = register("research_scroll_stellarium", new ScrollItem(STELLARIUM_INGOT, 0.015625F,new Item.Settings()));
+    public static final Item RESEARCH_BOOK = register("research_book_empty", new ResearchBookItem(new Item.Settings()));
+    public static final Item RESEARCH_BOOK_SILVER = register("research_book_silver", new ResearchBookItem(SILVER_INGOT,0.25F ,new Item.Settings()));
+    public static final Item RESEARCH_BOOK_ALUMINIUM = register("research_book_aluminium", new ResearchBookItem(ALUMINIUM_INGOT, 0.125F, new Item.Settings()));
+    public static final Item RESEARCH_BOOK_LUNAR_CRYSTAL = register("research_book_lunar_crystal", new ResearchBookItem(LUNAR_CRYSTAL, 0.16667F, new Item.Settings()));
+    public static final Item RESEARCH_BOOK_STELLARIUM = register("research_book_stellarium", new ResearchBookItem(STELLARIUM_INGOT, 0.015625F,new Item.Settings()));
+
+    public static final Item MOON_PEBBLE = register("moon_pebble", new Item(new Item.Settings()));
 
     public static final Item MOON_CAKE = register("moon_cake", new Item(new Item.Settings()
             .food(new FoodComponent.Builder()
@@ -54,6 +55,13 @@ public class SSEItems {
                     .saturationModifier(3.0F)
                     .statusEffect(new StatusEffectInstance(SSEStatusEffects.REFLUX, 60 * 20, 0), 1.0F)
                     .build())));
+
+    public static final Item LUNARIAN_SPAWN_EGG = register("lunarian_spawn_egg", new SpawnEggItem(
+            SSEEntities.LUNARIAN_ENTITY,
+            0xF1F1F1,
+            0xCB5DE4,
+            new Item.Settings()
+    ));
 
     public static Item register(String id, Item item) {
         Identifier itemID = Identifier.of(StarSkyExplority.MOD_ID, id);

@@ -4,7 +4,6 @@ import com.climinby.starsky_e.StarSkyExplority;
 import com.climinby.starsky_e.block.SSEBlocks;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
@@ -30,6 +29,10 @@ public class SSEItemGroups {
             Registries.ITEM_GROUP.getKey(),
             new Identifier(StarSkyExplority.MOD_ID, "blocks")
     );
+    public static final RegistryKey<ItemGroup> SSE_ENTITIES_KEY = RegistryKey.of(
+            Registries.ITEM_GROUP.getKey(),
+            new Identifier(StarSkyExplority.MOD_ID, "entities")
+    );
 
     public static final ItemGroup SSE_TOOLS_AND_WEAPONS = FabricItemGroup.builder()
             .icon(() -> new ItemStack(SSEItems.DIAMOND_COLLECTOR))
@@ -41,11 +44,15 @@ public class SSEItemGroups {
             .build();
     public static final ItemGroup SSE_FOOD = FabricItemGroup.builder()
             .icon(() -> new ItemStack(SSEItems.MOON_CAKE))
-            .displayName((Text.translatable("itemGroup.starsky_explority.food")))
+            .displayName(Text.translatable("itemGroup.starsky_explority.food"))
             .build();
     public static final ItemGroup SSE_BLOCKS = FabricItemGroup.builder()
             .icon(() -> new ItemStack(SSEBlocks.MOON_SOIL))
-            .displayName((Text.translatable("itemGroup.starsky_explority.blocks")))
+            .displayName(Text.translatable("itemGroup.starsky_explority.blocks"))
+            .build();
+    public static final ItemGroup SSE_ENTITIES = FabricItemGroup.builder()
+            .icon(() -> new ItemStack(SSEItems.LUNARIAN_SPAWN_EGG))
+            .displayName(Text.translatable("itemGroup.starsky_explority.entities"))
             .build();
 
     public static void initialize() {
@@ -71,11 +78,14 @@ public class SSEItemGroups {
                     itemGroup.add(SSEItems.ALUMINIUM_INGOT);
                     itemGroup.add(SSEItems.SILVER_NUGGET);
                     itemGroup.add(SSEItems.SILVER_INGOT);
+                    itemGroup.add(SSEItems.LUNAR_CRYSTAL);
                     itemGroup.add(SSEItems.STELLARIUM_INGOT);
-                    itemGroup.add(SSEItems.RESEARCH_SCROLL);
-                    itemGroup.add(SSEItems.RESEARCH_SCROLL_ALUMINIUM);
-                    itemGroup.add(SSEItems.RESEARCH_SCROLL_SILVER);
-                    itemGroup.add(SSEItems.RESEARCH_SCROLL_STELLARIUM);
+                    itemGroup.add(SSEItems.RESEARCH_BOOK);
+                    itemGroup.add(SSEItems.RESEARCH_BOOK_ALUMINIUM);
+                    itemGroup.add(SSEItems.RESEARCH_BOOK_SILVER);
+                    itemGroup.add(SSEItems.RESEARCH_BOOK_LUNAR_CRYSTAL);
+                    itemGroup.add(SSEItems.RESEARCH_BOOK_STELLARIUM);
+                    itemGroup.add(SSEItems.MOON_PEBBLE);
                 });
 
         Registry.register(Registries.ITEM_GROUP, SSE_FOOD_KEY, SSE_FOOD);
@@ -88,9 +98,18 @@ public class SSEItemGroups {
         Registry.register(Registries.ITEM_GROUP, SSE_BLOCKS_KEY, SSE_BLOCKS);
         ItemGroupEvents.modifyEntriesEvent(SSE_BLOCKS_KEY)
                 .register(itemGroup -> {
+                    itemGroup.add(SSEBlocks.MOONVEIL_MOSS);
                     itemGroup.add(SSEBlocks.MOON_SOIL);
+                    itemGroup.add(SSEBlocks.MOON_ROCK);
+                    itemGroup.add(SSEBlocks.ANORTHOSITE);
                     itemGroup.add(SSEBlocks.ANALYZER);
                     itemGroup.add(SSEBlocks.EXTRACTOR);
+                });
+
+        Registry.register(Registries.ITEM_GROUP, SSE_ENTITIES_KEY, SSE_ENTITIES);
+        ItemGroupEvents.modifyEntriesEvent(SSE_ENTITIES_KEY)
+                .register(itemGroup -> {
+                    itemGroup.add(SSEItems.LUNARIAN_SPAWN_EGG);
                 });
     }
 }

@@ -1,12 +1,10 @@
 package com.climinby.starsky_e.item;
 
-import com.climinby.starsky_e.planet.Planet;
+import com.climinby.starsky_e.registry.planet.Planet;
 import com.climinby.starsky_e.registry.SSERegistries;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.World;

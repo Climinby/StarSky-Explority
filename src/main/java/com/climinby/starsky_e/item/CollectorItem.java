@@ -1,10 +1,9 @@
 package com.climinby.starsky_e.item;
 
-import com.climinby.starsky_e.block.SSEBlocks;
 import com.climinby.starsky_e.registry.SSERegistries;
+import com.climinby.starsky_e.registry.sample.Sample;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.*;
@@ -35,7 +34,7 @@ public class CollectorItem extends ToolItem {
         }
         return false;
     }
-    public Set<Item> getRegionOf(BlockState state) {
+    private Set<Item> getRegionOf(BlockState state) {
         Block block = state.getBlock();
         Set<Item> items = new HashSet<>();
         for(Sample sampleType : SSERegistries.SAMPLE_TYPE) {
@@ -51,7 +50,7 @@ public class CollectorItem extends ToolItem {
         return items;
     }
 
-    public float getOdds(Item sample) {
+    private float getOdds(Item sample) {
         for(Sample sampleType : SSERegistries.SAMPLE_TYPE) {
             if(sampleType.getSampleItem() == sample) {
                 return sampleType.getOdds();

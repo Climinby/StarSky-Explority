@@ -1,6 +1,6 @@
 package com.climinby.starsky_e.nbt.player;
 
-import com.climinby.starsky_e.material.MaterialType;
+import com.climinby.starsky_e.registry.material.MaterialType;
 import com.climinby.starsky_e.registry.SSERegistries;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -14,8 +14,8 @@ public class ResearchLevel {
         NbtCompound nbt = handler.getSSEData();
         if(nbt.contains(RESEARCH_LEVEL_KEY)) {
             NbtCompound researchLevels = nbt.getCompound(RESEARCH_LEVEL_KEY);
-            if(researchLevels.contains(material.getNbtKey())) {
-                level = researchLevels.getFloat(material.getNbtKey());
+            if(researchLevels.contains(material.getId())) {
+                level = researchLevels.getFloat(material.getId());
             }
         }
         return level;
@@ -30,15 +30,15 @@ public class ResearchLevel {
         NbtCompound nbt = handler.getSSEData();
         if(nbt.contains(RESEARCH_LEVEL_KEY)) {
             NbtCompound researchLevels = nbt.getCompound(RESEARCH_LEVEL_KEY);
-            researchLevels.putFloat(material.getNbtKey(), level);
+            researchLevels.putFloat(material.getId(), level);
             nbt.put(RESEARCH_LEVEL_KEY, researchLevels);
         } else {
             NbtCompound researchLevels = new NbtCompound();
             for(MaterialType material2 : SSERegistries.MATERIAL_TYPE) {
                 if(material2.equals(material)) {
-                    researchLevels.putFloat(material.getNbtKey(), level);
+                    researchLevels.putFloat(material.getId(), level);
                 } else {
-                    researchLevels.putFloat(material2.getNbtKey(), 0.0F);
+                    researchLevels.putFloat(material2.getId(), 0.0F);
                 }
             }
             nbt.put(RESEARCH_LEVEL_KEY, researchLevels);

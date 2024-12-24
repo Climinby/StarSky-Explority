@@ -2,10 +2,12 @@ package com.climinby.starsky_e.recipe;
 
 import com.climinby.starsky_e.inventory.AnalysisInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.RecipeType;
 import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.World;
 
 import java.util.*;
@@ -81,7 +83,7 @@ public class AnalysisRecipe implements Recipe<AnalysisInventory> {
 
     @Override
     public ItemStack getResult(DynamicRegistryManager registryManager) {
-        return null;
+        return ItemStack.EMPTY;
     }
 
     @Override
@@ -92,6 +94,13 @@ public class AnalysisRecipe implements Recipe<AnalysisInventory> {
     @Override
     public RecipeType<?> getType() {
         return type;
+    }
+
+    @Override
+    public DefaultedList<Ingredient> getIngredients() {
+        DefaultedList<Ingredient> ingredients = DefaultedList.of();
+        ingredients.add(Ingredient.ofStacks(input));
+        return ingredients;
     }
 
     public ItemStack getInput() {

@@ -20,6 +20,7 @@ import com.climinby.starsky_e.screen.SSEScreenHandlers;
 import com.climinby.starsky_e.sound.SSESoundEvents;
 import com.climinby.starsky_e.util.SSEBlockExtend;
 import com.climinby.starsky_e.util.SSEServerDataReceiver;
+import com.climinby.starsky_e.world.biome.SSEBiomeKeys;
 import net.fabricmc.api.ModInitializer;
 
 import org.slf4j.Logger;
@@ -43,6 +44,7 @@ public class StarSkyExplority implements ModInitializer {
 		SSEServerDataReceiver.initialize();
 		SSEBlockExtend.init();
 
+		SSEBiomeKeys.init();
 		SSEItems.initialize();
 		SSEBlocks.initialize();
 		SSEItemGroups.initialize();

@@ -4,12 +4,12 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.FallingBlock;
+import net.minecraft.entity.FallingBlockEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -21,14 +21,20 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
+import net.minecraft.world.tick.TickPriority;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ForalFallingBlock extends FallingBlock {
     private static final MapCodec<ForalFallingBlock> CODEC = createCodec(settings -> new ForalFallingBlock(SSEBlocks.MOON_SOIL, settings));
     private final Block soilBlock;
+    private boolean firstDegenerationCheck = true;
+    private int degenerateTime = -1;
+    private Map<BlockPos, Integer> degenerateTimes = new HashMap<>();
 
     public ForalFallingBlock(Block soilBlock, Settings settings) {
         super(settings);
@@ -42,14 +48,29 @@ public class ForalFallingBlock extends FallingBlock {
 
     @Override
     public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-        super.scheduledTick(state, world, pos, random);
-
-        BlockState upState = world.getBlockState(pos.up());
-        if(!upState.isAir() && !upState.isTransparent(world, pos.up())) {
-            world.setBlockState(pos, this.soilBlock.getDefaultState());
-            world.scheduleBlockTick(pos, this, (30 + random.nextInt(60)) * 20);
+        if(!(canFallThrough(world.getBlockState(pos.down())) && pos.getY() >= world.getBottomY())) {
+            BlockState upState = world.getBlockState(pos.up());
+            if(!upState.isAir() && !upState.isTransparent(world, pos.up())) {
+                Integer degenerateTime = this.degenerateTimes.get(pos);
+                if (degenerateTime == null) {
+                    this.degenerateTimes.put(pos, (30 + random.nextInt(61)) * 20);
+                } else {
+                    if(degenerateTime == 0) {
+                        this.degenerateTimes.remove(pos);
+                        world.setBlockState(pos, this.soilBlock.getDefaultState());
+                    } else {
+                        this.degenerateTimes.put(pos, degenerateTime - 1);
+                    }
+                }
+                world.scheduleBlockTick(pos, this, 0, TickPriority.VERY_LOW);
+            } else {
+                Integer degenerateTime = this.degenerateTimes.get(pos);
+                if(degenerateTime != null) this.degenerateTimes.remove(pos);
+            }
+        } else {
+            FallingBlockEntity fallingBlockEntity = FallingBlockEntity.spawnFromBlock(world, pos, state);
+            this.configureFallingBlockEntity(fallingBlockEntity);
         }
-
     }
 
     @Override
@@ -124,20 +145,39 @@ public class ForalFallingBlock extends FallingBlock {
     public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
         super.onPlaced(world, pos, state, placer, itemStack);
 
-        BlockState upperState = world.getBlockState(pos.up());
-        if(!upperState.isAir() && !upperState.isTransparent(world, pos.up())) {
-            world.scheduleBlockTick(pos, this, (30 + Random.create().nextInt(60)) * 20);
-        }
+//        if(!world.isClient()) {
+//            BlockState upperState = world.getBlockState(pos.up());
+//            if(!upperState.isAir() && !upperState.isTransparent(world, pos.up())) {
+//                state.randomTick((ServerWorld) world, pos, world.getRandom());
+//            }
+//        }
+//        world.scheduleBlockTick(pos, this, 0);
     }
 
     @Override
     public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-        if(direction == Direction.UP) {
-            if(!neighborState.isAir() && !neighborState.isTransparent(world, neighborPos)) {
-                world.scheduleBlockTick(pos, this, (30 + Random.create().nextInt(60)) * 20);
-            }
-        }
+//        if(!world.isClient()) {
+//            if (direction == Direction.UP) {
+//                if (!neighborState.isAir() && !neighborState.isTransparent(world, neighborPos)) {
+//                    state.randomTick((ServerWorld) world, pos, world.getRandom());
+//                }
+//            }
+//        }
+
+        world.scheduleBlockTick(pos, this, this.getFallDelay(), TickPriority.HIGH);
         return state;
+//        if(direction == Direction.UP) {
+//            if(!neighborState.isAir() && !neighborState.isTransparent(world, neighborPos)) {
+//
+//                this.degenerateTime = (30 + (world.getRandom().nextInt(61))) * 20;
+////                world.scheduleBlockTick(pos, this, (30 + Random.create().nextInt(60)) * 20);
+//            }
+//        } else if(direction == Direction.DOWN) {
+////            super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
+//        }
+////        world.scheduleBlockTick(pos, this, (30 + Random.create().nextInt(60)) * 20);
+//        world.scheduleBlockTick(pos, this, 0);
+//        return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
     }
 
     private boolean canSpread(World world, BlockPos pos) {

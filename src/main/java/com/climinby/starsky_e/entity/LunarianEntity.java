@@ -21,6 +21,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.particle.DustParticleEffect;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
@@ -28,13 +30,14 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
+import org.joml.Vector3f;
 
 import java.util.*;
 
 public class LunarianEntity extends PathAwareEntity {
-    private int sightLockCoolDown = 0;
+    private int sightLockCoolDown = 100;
     private LivingEntity attacker = null;
-    private boolean isInWater = false;
     private boolean isFloating = false;
     private boolean isDiving = false;
     private boolean isBreathing = false;
@@ -50,6 +53,11 @@ public class LunarianEntity extends PathAwareEntity {
     }
 
     @Override
+    public boolean canBeHitByProjectile() {
+        return false;
+    }
+
+    @Override
     public void tick() {
         super.tick();
         if(this.attackCoolDown != 0) this.attackCoolDown--;
@@ -60,33 +68,39 @@ public class LunarianEntity extends PathAwareEntity {
         if(this.attacker instanceof PlayerEntity playerTarget) {
             if(playerTarget.isCreative() || playerTarget.isSpectator()) {
                 this.attacker = null;
-                this.setTarget(null);
+                if(!this.getWorld().isClient()) {
+                    this.setTarget(null);
+                }
             }
         }
         if(this.attacker != null && !this.isInRange(this.attacker, 96.0)) {
             this.attacker = null;
-            this.setTarget(null);
+            if(!this.getWorld().isClient()) {
+                this.setTarget(null);
+            }
         }
         if(this.attacker != null) {
             Item offHandItem = this.attacker.getOffHandStack().getItem();
             Item mainHandItem = this.attacker.getMainHandStack().getItem();
             this.canTeleport = offHandItem == Items.SHIELD || mainHandItem == Items.SHIELD;
-            if (this.getTarget() != this.attacker) {
+            if (!this.getWorld().isClient() && this.getTarget() != this.attacker) {
                 this.setTarget(this.attacker);
             }
         }
 
-        if(this.getTarget() != null) {
-            LivingEntity target = this.getTarget();
-            if(this.attackCoolDown == 0) {
-                tryAttack(target);
-                this.attackCoolDown = 15;
+        if(!this.isDead() && this.attacker != null) {
+            if(!this.getWorld().isClient()) {
+                LivingEntity target = this.getTarget();
+                if (this.attackCoolDown == 0) {
+                    tryAttack(target);
+                    this.attackCoolDown = 15;
+                }
             }
 
             if(this.getHealth() > 10 && this.sightLockCoolDown == 0) {
                 int random = new Random().nextInt(3);
                 if (random < 2) {
-                    this.sightLock(target);
+                    this.sightLock(this.attacker);
                 }
                 this.sightLockCoolDown = 100;
             }
@@ -94,7 +108,9 @@ public class LunarianEntity extends PathAwareEntity {
 
         if(this.attacker != null && this.attacker.isDead()) {
             this.attacker = null;
-            this.setTarget(null);
+            if(!this.getWorld().isClient()) {
+                this.setTarget(null);
+            }
         }
 
         //Projectile Reflecting
@@ -103,12 +119,11 @@ public class LunarianEntity extends PathAwareEntity {
         this.projectileBounce(projectiles);
 
         //In-water Conduction
+        boolean isInWater = false;
         if(this.isTouchingWater()) {
-            this.isInWater = true;
-        } else {
-            this.isInWater = false;
+            isInWater = true;
         }
-        if(this.isInWater) {
+        if(isInWater) {
             this.addStatusEffect(new StatusEffectInstance(StatusEffects.DOLPHINS_GRACE, 30, 2, false, false, false));
         } else {
             StatusEffectInstance dolphinsGrace = this.getStatusEffect(StatusEffects.DOLPHINS_GRACE);
@@ -166,10 +181,12 @@ public class LunarianEntity extends PathAwareEntity {
         }
 
         //Teleport
-        if(canTeleport && canTeleportToBack()) {
-            if(this.teleportCoolDown == 0) {
-                this.teleportation();
-                this.teleportCoolDown = 80;
+        if(this.getHealth() > 15 && this.attacker != null) {
+            if (this.teleportCoolDown == 0) {
+                if (canTeleport && canTeleportToBack()) {
+                    this.teleportation();
+                    this.teleportCoolDown = 80;
+                }
             } else {
                 this.teleportCoolDown--;
             }
@@ -197,6 +214,17 @@ public class LunarianEntity extends PathAwareEntity {
                 }
             }
             return true;
+        } else if(this.getWorld().isClient()) {
+            Entity attackerEntity = source.getAttacker();
+            if(attackerEntity != null) {
+                if(attackerEntity instanceof PlayerEntity attackingPlayer) {
+                    if(!attackingPlayer.isCreative() && !attackingPlayer.isSpectator()) {
+                        this.attacker = attackingPlayer;
+                    }
+                } else if(attackerEntity instanceof LivingEntity attacker) {
+                    this.attacker = attacker;
+                }
+            }
         }
         return false;
     }
@@ -246,22 +274,60 @@ public class LunarianEntity extends PathAwareEntity {
 
     private void sightLock(LivingEntity target) {
         target.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, this.getEyePos());
-        if(!this.getWorld().isClient()) {
-            if (target instanceof ServerPlayerEntity playerTarget) {
-                Identifier soundId = Registries.SOUND_EVENT.getId(SSESoundEvents.ENTITY_LUNARIAN_SIGHT_LOCK);
-                sendSoundOutput(playerTarget, soundId, SoundCategory.HOSTILE, 2.0F, 1.0F);
+        World world = this.getWorld();
+        if(world.isClient()) {
+            for(PlayerEntity player : world.getPlayers()) {
+                world.playSound(
+                        player,
+                        this.getX(),
+                        this.getY(),
+                        this.getZ(),
+                        SSESoundEvents.ENTITY_LUNARIAN_SIGHT_LOCK,
+                        SoundCategory.HOSTILE,
+                        2.0F,
+                        1.0F
+                );
             }
         }
     }
 
     private void projectileBounce(Entity projectile) {
         if(isProjectile(projectile)) {
-            double velocity = projectile.getVelocity().length();
-            Vec3d pos = this.getEyePos();
+            Vec3d prePos = new Vec3d(projectile.prevX, projectile.prevY, projectile.prevZ);
             Vec3d projPos = projectile.getPos();
-            Vec3d unit = projPos.subtract(pos).normalize();
-            Vec3d newVelocity = unit.multiply(velocity);
-            projectile.setVelocity(newVelocity);
+            if(prePos.distanceTo(projPos) >= 0.0001) {
+                double velocity = projectile.getVelocity().length();
+                Vec3d pos = this.getEyePos();
+                Vec3d unit = projPos.subtract(pos).normalize();
+                Vec3d newVelocity = unit.multiply(velocity);
+                World world = this.getWorld();
+                if (world.isClient()) {
+                    net.minecraft.util.math.random.Random random = world.getRandom();
+                    int count = 10;
+                    DustParticleEffect shieldParticle = new DustParticleEffect(
+                            new Vector3f(139.0F / 255.0F, 229.0F / 255.0F, 246.0F / 255.0F),
+                            1.0F
+                    );
+                    Vec3d u1 = new Vec3d(-unit.y, unit.x, 0.0).normalize();
+                    Vec3d u2 = unit.crossProduct(u1).normalize();
+                    for (int i = 0; i < count; i++) {
+                        double t = random.nextDouble() * 2 * Math.PI;
+                        Vec3d aVec = u1.multiply(Math.cos(t)).add(u2.multiply(Math.sin(t))).normalize().add(unit.multiply(random.nextDouble() * velocity * 0.3));
+                        for(double d = 0.0; d <= velocity * 0.5; d += 0.15) {
+                            world.addParticle(
+                                    shieldParticle,
+                                    projPos.x + aVec.x * d,
+                                    projPos.y + aVec.y * d,
+                                    projPos.z + aVec.z * d,
+                                    (unit.x + random.nextGaussian() * 0.1) * velocity,
+                                    (unit.y + random.nextGaussian() * 0.1) * velocity,
+                                    (unit.z + random.nextGaussian() * 0.1) * velocity
+                            );
+                        }
+                    }
+                }
+                projectile.setVelocity(newVelocity);
+            }
         }
     }
 
@@ -310,54 +376,41 @@ public class LunarianEntity extends PathAwareEntity {
         double rYaw = this.attacker.getYaw() * Math.PI / 180;
         Vec3d facingDir = new Vec3d(-Math.sin(rYaw), 0, Math.cos(rYaw));
         Vec3d desPos = attackerPos.subtract(facingDir);
-        Identifier soundId = Registries.SOUND_EVENT.getId(SSESoundEvents.ENTITY_LUNARIAN_TELEPORT);
-        if(!this.getWorld().isClient()) {
-            for (PlayerEntity player : this.getWorld().getPlayers()) {
-                sendSoundOutput((ServerPlayerEntity) player, soundId, SoundCategory.HOSTILE, 2.0F, 1.0F);
+        World world = this.getWorld();
+        if(world.isClient()) {
+            Vec3d thisPos = this.getPos();
+            Vec3d dVec = desPos.subtract(thisPos);
+            double distance = dVec.length();
+            int count = 4;
+            net.minecraft.util.math.random.Random random = world.getRandom();
+            for(double d = 0.0; d <= distance; d += 0.2) {
+                double multiple = d / distance;
+                Vec3d particleCenter = thisPos.add(dVec.multiply(multiple)).add(0, 1, 0);
+                for(int i = 0; i < count; i++) {
+                    world.addParticle(
+                            ParticleTypes.GLOW,
+                            particleCenter.x + (random.nextDouble() - 0.5) * 0.7,
+                            particleCenter.y + (random.nextDouble() - 0.5),
+                            particleCenter.z + (random.nextDouble() - 0.5) * 0.7,
+                            0.0,
+                            -Math.abs(random.nextGaussian()) * 0.05,
+                            0.0
+                    );
+                }
+            }
+            for(PlayerEntity player : world.getPlayers()) {
+                world.playSound(
+                        player,
+                        this.getX(),
+                        this.getY(),
+                        this.getZ(),
+                        SSESoundEvents.ENTITY_LUNARIAN_TELEPORT,
+                        SoundCategory.HOSTILE,
+                        2.0F,
+                        1.0F
+                );
             }
         }
         this.teleport(desPos.x, desPos.y, desPos.z);
-    }
-
-    private static void sendSoundOutput(ServerPlayerEntity player, Identifier soundId, SoundCategory soundCategory, float volume, float pitch) {
-        int soundCate = 0;
-        switch(soundCategory) {
-            case MASTER:
-                break;
-            case MUSIC:
-                soundCate = 1;
-                break;
-            case RECORDS:
-                soundCate = 2;
-                break;
-            case WEATHER:
-                soundCate = 3;
-                break;
-            case BLOCKS:
-                soundCate = 4;
-                break;
-            case HOSTILE:
-                soundCate = 5;
-                break;
-            case NEUTRAL:
-                soundCate = 6;
-                break;
-            case PLAYERS:
-                soundCate = 7;
-                break;
-            case AMBIENT:
-                soundCate = 8;
-                break;
-            case VOICE:
-                soundCate = 9;
-                break;
-        }
-        ServerPlayNetworking.send(player, SSENetworkingConstants.DATA_SOUND_TRIGGER,
-                PacketByteBufs.create()
-                        .writeIdentifier(soundId)
-                        .writeInt(soundCate)
-                        .writeFloat(volume)
-                        .writeFloat(pitch)
-        );
     }
 }

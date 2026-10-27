@@ -7,24 +7,48 @@
       "type": "minecraft:multi_noise",
       "biomes": [
         {
-          "biome": "starsky_explority:lunar_plains",
+          "biome": "starsky_explority:glimmereach",
           "parameters": {
-            "temperature": 0.02,
-            "humidity": 0.3,
-            "continentalness": 0.999,
-            "erosion": 0.9998,
-            "weirdness": 0,
-            "depth": 0.003,
+            "temperature": 0.6,
+            "humidity": 0.6,
+            "continentalness": 0,
+            "erosion": 0.5,
+            "weirdness": 0.2,
+            "depth": 0,
             "offset": 0
+          }
+        },
+        {
+          "biome": "starsky_explority:thornwilds",
+          "parameters": {
+            "temperature": 0.3,
+            "humidity": 0.3,
+            "continentalness": 0,
+            "erosion": 0.5,
+            "weirdness": 0.3,
+            "depth": 0,
+            "offset": 0.3
           }
         },
         {
           "biome": "starsky_explority:lunar_plains",
           "parameters": {
+            "temperature": 0.1,
+            "humidity": 1e-12,
+            "continentalness": 0,
+            "erosion": 0.2,
+            "weirdness": 0.2,
+            "depth": 0,
+            "offset": 0
+          }
+        },
+        {
+          "biome": "starsky_explority:lunar_wasteland",
+          "parameters": {
             "temperature": 0,
-            "humidity": 0.31,
-            "continentalness": 1,
-            "erosion": 0.99998,
+            "humidity": 0,
+            "continentalness": 0,
+            "erosion": 0,
             "weirdness": 0,
             "depth": 0,
             "offset": 0

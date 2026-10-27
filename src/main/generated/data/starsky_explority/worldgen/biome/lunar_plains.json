@@ -3,6 +3,7 @@
   "downfall": 0.0,
   "effects": {
     "fog_color": 5,
+    "grass_color": 8173267,
     "sky_color": 5,
     "water_color": 4159204,
     "water_fog_color": 1121069
@@ -16,9 +17,9 @@
     "creature": [
       {
         "type": "minecraft:rabbit",
-        "maxCount": 3,
-        "minCount": 2,
-        "weight": 4
+        "maxCount": 5,
+        "minCount": 4,
+        "weight": 50
       }
     ],
     "misc": [],
